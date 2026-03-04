@@ -52,13 +52,28 @@ const routes = {
   '/api/uptime':          () => ({ uptime: hw.getUptime() }),
   '/api/containers':      () => hw.getContainers(),
   '/api/hostname':        () => ({ hostname: os.hostname() }),
-  '/api/storage':         () => storage.getStoragePools(),
-  '/api/storage/disks':   () => ({ disks: storage.detectStorageDisks() }),
-  '/api/storage/health':  () => storage.checkStorageHealth(),
-  '/api/storage/status':  () => storage.getStoragePools(),
-  '/api/storage/shares':  () => ({ shares: shares.getShares() }),
   '/api/hardware/gpu-info': () => hw.getHardwareGpuInfo(),
-  '/api/firewall':        () => network.getFirewallScan(),
+  '/api/system/info':     () => {
+    const interfaces = hw.getNetwork();
+    const hostname = os.hostname();
+    const gateway = run("ip route | grep default | awk '{print $3}' | head -1") || '—';
+    const dns = run("cat /etc/resolv.conf 2>/dev/null | grep nameserver | awk '{print $2}'") || '';
+    const dnsServers = dns.split('\n').filter(Boolean);
+    const primaryIface = interfaces.find(n => n.ip !== '—') || {};
+    const subnet = run(`ip -4 -o addr show ${primaryIface.name || 'eth0'} 2>/dev/null | awk '{print $4}'`) || '—';
+    return { network: { hostname, gateway, subnet, dns: dnsServers, interfaces } };
+  },
+  '/api/storage':           () => storage.getStoragePools(),
+  '/api/storage/disks':     () => ({ disks: storage.detectStorageDisks() }),
+  '/api/storage/pools':     () => storage.getStoragePools(),
+  '/api/storage/status':    () => ({ pools: storage.getStoragePools(), alerts: storage.storageAlerts, hasPool: storage.hasPool() }),
+  '/api/storage/alerts':    () => ({ alerts: storage.storageAlerts }),
+  '/api/storage/health':    () => storage.checkStorageHealth(),
+  '/api/storage/detect-existing': () => ({ pools: storage.detectExistingPools() }),
+  '/api/firewall':          () => network.getFirewallScan(),
+  '/api/firewall/rules':    () => network.getFirewallRules(),
+  '/api/firewall/ports':    () => network.getListeningPorts(),
+  '/api/firewall/scan':     () => network.getFirewallScan(),
 };
 
 // ═══════════════════════════════════
@@ -140,7 +155,7 @@ const server = http.createServer((req, res) => {
   if (url.startsWith('/api/shares'))
     return routeHandler(req, res, method, url, shares.handleShares);
 
-  if (url.startsWith('/api/docker'))
+  if (url.startsWith('/api/docker') || url.startsWith('/api/permissions'))
     return routeHandler(req, res, method, url, docker.handleDocker);
 
   if (url.startsWith('/api/remote-access'))
