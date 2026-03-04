@@ -1071,8 +1071,12 @@ function restorePool(device, poolName) {
       for (const file of restorableFiles) {
         const backupFile = path.join(backupDir, file);
         const targetFile = path.join(CONFIG_DIR, file);
-        if (fs.existsSync(backupFile) && !fs.existsSync(targetFile)) {
-          fs.copyFileSync(backupFile, targetFile);
+        if (fs.existsSync(backupFile)) {
+          // Overwrite if target doesn't exist or is empty/default
+          const targetContent = fs.existsSync(targetFile) ? fs.readFileSync(targetFile, 'utf8').trim() : '';
+          if (!targetContent || targetContent === '[]' || targetContent === '{}') {
+            fs.copyFileSync(backupFile, targetFile);
+          }
         }
       }
       restoredConfig = true;
