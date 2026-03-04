@@ -10,6 +10,7 @@ const http = require('http');
 const dgram = require('dgram');
 const { URL } = require('url');
 const { NIMBUS_ROOT, CONFIG_DIR, getSessionUser, run, readFile, formatBytes } = require('./shared.cjs');
+const { getShares } = require('./shares.cjs');
 
 // ═══════════════════════════════════
 // Native Apps API

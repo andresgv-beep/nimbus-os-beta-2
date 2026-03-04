@@ -6,6 +6,8 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { NIMBUS_ROOT, CONFIG_DIR, DOCKER_FILE, getSessionUser, sanitizeDockerName, isValidPort, run } = require('./shared.cjs');
+const { getShares } = require('./shares.cjs');
+const { getStorageConfig } = require('./storage.cjs');
 const { registerApp, unregisterApp, getInstalledApps } = require('./apps.cjs');
 
 // ═══════════════════════════════════
@@ -977,6 +979,18 @@ tts:
       });
       
       console.log(`[Docker] Stack "${safeId}" registered in launcher`);
+      
+      // Download app icon to local cache
+      if (body.icon && body.icon.startsWith('http')) {
+        try {
+          const ext = path.extname(new URL(body.icon).pathname) || '.svg';
+          const iconName = safeId + ext;
+          const iconDir = path.join(__dirname, '..', '..', 'public', 'app-icons');
+          fs.mkdirSync(iconDir, { recursive: true });
+          execSync(`curl -fsSL "${body.icon}" -o "${iconDir}/${iconName}"`, { timeout: 15000 });
+          console.log('[Docker] Icon downloaded:', iconName);
+        } catch (e) { console.log('[Docker] Icon download failed:', e.message); }
+      }
       
       return { 
         ok: true, 
