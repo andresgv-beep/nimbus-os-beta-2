@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { NIMBUS_ROOT, CONFIG_DIR, DOCKER_FILE, getSessionUser, sanitizeDockerName, isValidPort, run } = require('./shared.cjs');
-const { getShares } = require('./shares.cjs');
+const { getShares, saveShares } = require('./shares.cjs');
 const { getStorageConfig } = require('./storage.cjs');
 const { registerApp, unregisterApp, getInstalledApps } = require('./apps.cjs');
 

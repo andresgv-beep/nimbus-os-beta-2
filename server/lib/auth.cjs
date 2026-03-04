@@ -159,8 +159,13 @@ setInterval(() => {
 // ═══════════════════════════════════
 const SERVER_KEY_FILE = path.join(CONFIG_DIR, '.server_key');
 function getServerKey() {
-  if (fs.existsSync(SERVER_KEY_FILE)) return fs.readFileSync(SERVER_KEY_FILE, 'utf-8').trim();
-  const key = crypto.randomBytes(48).toString('base64url');
+  if (fs.existsSync(SERVER_KEY_FILE)) {
+    const existing = fs.readFileSync(SERVER_KEY_FILE, 'utf-8').trim();
+    // If key is valid 64-char hex (32 bytes), use it directly
+    if (/^[0-9a-f]{64}$/i.test(existing)) return existing;
+    // Otherwise regenerate as proper hex key
+  }
+  const key = crypto.randomBytes(32).toString('hex');
   fs.writeFileSync(SERVER_KEY_FILE, key, { mode: 0o600 });
   return key;
 }
