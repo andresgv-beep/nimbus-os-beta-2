@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 # ╔══════════════════════════════════════════════════════════════╗
-# ║  NimbusOS Installer                                         ║
-# ║  Transforms Ubuntu Server into a NimbusOS NAS               ║
-# ║  Usage: curl -fsSL https://get.nimbusos.dev/install | bash  ║
+# ║  NimbusOS Beta 2 Installer                                  ║
+# ║  Transforms Ubuntu/Debian Server into a NimbusOS NAS        ║
+# ║  curl -fsSL https://raw.githubusercontent.com/              ║
+# ║    andresgv-beep/nimbus-os-beta-2/main/install.sh | sudo bash║
 # ╚══════════════════════════════════════════════════════════════╝
 
 set -euo pipefail
 
 # ── Config ──
-NIMBUS_VERSION="1.0.0"
-NIMBUS_REPO="https://github.com/nimbusos-project/nimbusos.git"
+NIMBUS_VERSION="2.0.0-beta"
+NIMBUS_REPO="https://github.com/andresgv-beep/nimbus-os-beta-2"
 NIMBUS_BRANCH="main"
 INSTALL_DIR="/opt/nimbusos"
 DATA_DIR="/var/lib/nimbusos"
