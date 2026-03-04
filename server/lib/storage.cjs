@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { NIMBUS_ROOT, CONFIG_DIR, run, readFile, formatBytes } = require('./shared.cjs');
+const HAS_SMARTCTL = !!run('which smartctl 2>/dev/null');
 
 // ═══════════════════════════════════════════════════
 // STORAGE MANAGER
@@ -877,50 +878,12 @@ function checkStorageHealth() {
 setInterval(checkStorageHealth, 60000); // Every 60s
 setInterval(() => { if (hasPool()) backupConfigToPool(); }, 6 * 60 * 60 * 1000); // Every 6h
 
-const routes = {
-  '/api/system': () => getCachedSystem(),
-  '/api/cpu': () => getCpuUsage(),
-  '/api/memory': () => getMemory(),
-  '/api/gpu': () => getGpu(),
-  '/api/temps': () => getTemps(),
-  '/api/network': () => getNetwork(),
-  '/api/system/info': () => {
-    const interfaces = getNetwork();
-    const hostname = os.hostname();
-    const gateway = run("ip route | grep default | awk '{print $3}' | head -1") || '—';
-    const dns = run("cat /etc/resolv.conf 2>/dev/null | grep nameserver | awk '{print $2}'") || '';
-    const dnsServers = dns.split('\n').filter(Boolean);
-    const primaryIface = interfaces.find(n => n.ip !== '—') || {};
-    const subnet = run(`ip -4 -o addr show ${primaryIface.name || 'eth0'} 2>/dev/null | awk '{print $4}'`) || '—';
-    return {
-      network: {
-        hostname,
-        gateway,
-        subnet,
-        dns: dnsServers,
-        interfaces,
-      }
-    };
-  },
-  '/api/storage/disks': () => detectStorageDisks(),
-  '/api/storage/pools': () => getStoragePools(),
-  '/api/storage/status': () => ({ pools: getStoragePools(), alerts: storageAlerts, hasPool: hasPool() }),
-  '/api/storage/alerts': () => ({ alerts: storageAlerts }),
-  '/api/storage/detect-existing': () => ({ pools: detectExistingPools() }),
-  '/api/disks': () => getDisks(),
-  '/api/uptime': () => ({ uptime: getUptime() }),
-  '/api/containers': () => getContainers(),
-  '/api/hostname': () => ({ hostname: os.hostname() }),
-  '/api/hardware/gpu-info': () => getHardwareGpuInfo(),
-  '/api/firewall/rules': () => getFirewallRules(),
-  '/api/firewall/ports': () => getListeningPorts(),
-  '/api/firewall/scan': () => getFirewallScan(),
-};
 
 
 module.exports = {
   getStorageConfig, saveStorageConfig, hasPool, detectStorageDisks,
   getRAIDStatus, getStoragePools, createPool, wipeDisk, destroyPool,
   backupConfigToPool, detectExistingPools, checkStorageHealth,
+  get storageAlerts() { return storageAlerts; },
   NIMBUS_POOLS_DIR,
 };
