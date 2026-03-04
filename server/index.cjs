@@ -156,7 +156,7 @@ const server = http.createServer((req, res) => {
   if (url.startsWith('/api/shares'))
     return routeHandler(req, res, method, url, shares.handleShares);
 
-  if (url.startsWith('/api/docker') || url.startsWith('/api/permissions'))
+  if (url.startsWith('/api/docker') || url.startsWith('/api/permissions') || url.startsWith('/api/installed-apps'))
     return routeHandler(req, res, method, url, docker.handleDocker);
 
   if (url.startsWith('/api/remote-access'))
