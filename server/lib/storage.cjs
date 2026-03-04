@@ -409,10 +409,30 @@ function createPool(name, disks, level, filesystem = 'ext4') {
           if (line.includes(diskName)) {
             const arrayMatch = line.match(/^(md\d+)/);
             if (arrayMatch) {
-              execSync(`mdadm --stop /dev/${arrayMatch[1]} 2>/dev/null || true`, { timeout: 10000 });
+              const mdDev = `/dev/${arrayMatch[1]}`;
+              console.log(`[Storage] Found active array ${mdDev} containing ${disk}`);
+              // Unmount the array first
+              const mdMount = run(`findmnt -n -o TARGET ${mdDev} 2>/dev/null`)?.trim();
+              if (mdMount) {
+                console.log(`[Storage] Unmounting ${mdDev} from ${mdMount}`);
+                execSync(`umount -f ${mdDev} 2>/dev/null || true`, { timeout: 15000 });
+                execSync(`sed -i '\\|${mdMount.replace(/\//g, '\\/')}|d' /etc/fstab 2>/dev/null || true`, { timeout: 5000 });
+              }
+              // Remove fstab entries for this array
+              execSync(`sed -i '\\|${arrayMatch[1]}|d' /etc/fstab 2>/dev/null || true`, { timeout: 5000 });
+              // Stop the array
+              console.log(`[Storage] Stopping array ${mdDev}`);
+              execSync(`mdadm --stop ${mdDev} 2>/dev/null || true`, { timeout: 15000 });
+              // If stop failed, force it
+              if (run(`cat /proc/mdstat 2>/dev/null`)?.includes(arrayMatch[1])) {
+                console.log(`[Storage] Force stopping ${mdDev}`);
+                execSync(`mdadm --stop --force ${mdDev} 2>/dev/null || true`, { timeout: 15000 });
+              }
             }
           }
         }
+        // Update mdadm.conf
+        execSync('mdadm --detail --scan > /etc/mdadm/mdadm.conf 2>/dev/null || true', { timeout: 5000 });
         // Clear superblocks from all existing partitions
         if (diskInfo && diskInfo.partitions) {
           for (const part of diskInfo.partitions) {
