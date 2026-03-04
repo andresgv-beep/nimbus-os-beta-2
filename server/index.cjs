@@ -64,7 +64,7 @@ const routes = {
     return { network: { hostname, gateway, subnet, dns: dnsServers, interfaces } };
   },
   '/api/storage':           () => storage.getStoragePools(),
-  '/api/storage/disks':     () => ({ disks: storage.detectStorageDisks() }),
+  '/api/storage/disks':     () => storage.detectStorageDisks(),
   '/api/storage/pools':     () => storage.getStoragePools(),
   '/api/storage/status':    () => ({ pools: storage.getStoragePools(), alerts: storage.storageAlerts, hasPool: storage.hasPool() }),
   '/api/storage/alerts':    () => ({ alerts: storage.storageAlerts }),
