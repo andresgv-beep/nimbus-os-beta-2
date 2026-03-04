@@ -117,3 +117,50 @@
 }
 .raidSync .progressBar { flex: 1; }
 .raidActions { display: flex; gap: var(--space-2); margin-top: var(--space-4); }
+
+/* Modal dialog */
+.modalOverlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg-overlay); display: flex; align-items: center;
+  justify-content: center; z-index: var(--z-modal);
+}
+.modalBody {
+  background: var(--bg-window); border-radius: var(--radius-lg);
+  padding: var(--space-8); max-width: 480px; width: 90%;
+  border: 1px solid var(--border); box-shadow: var(--shadow-lg);
+}
+.modalInput {
+  width: 100%; padding: 8px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--bg-input);
+  color: var(--text-primary); font-size: var(--text-sm);
+  margin-bottom: var(--space-4); box-sizing: border-box;
+}
+.modalInput:focus { border-color: var(--border-focus); outline: none; }
+.modalActions { display: flex; gap: var(--space-3); justify-content: flex-end; }
+
+/* Alert banners */
+.alertBanner {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-3) var(--space-4); border-radius: var(--radius);
+  margin-bottom: var(--space-3); font-size: var(--text-sm);
+}
+.alertDanger { background: var(--color-danger-bg); color: var(--color-danger); }
+.alertWarning { background: var(--color-warning-bg); color: var(--color-warning); }
+.alertSuccess { background: var(--color-success-bg); color: var(--color-success); }
+
+/* Button variants */
+.btnDanger {
+  composes: btn;
+  background: var(--color-danger); border-color: transparent;
+  color: white; font-weight: var(--weight-medium);
+}
+.btnDanger:hover { filter: brightness(1.1); }
+.btnDanger:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Form inputs (create pool, selects) */
+.formInput {
+  padding: 8px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--bg-input);
+  color: var(--text-primary); font-size: var(--text-sm);
+}
+.formInput:focus { border-color: var(--border-focus); outline: none; }

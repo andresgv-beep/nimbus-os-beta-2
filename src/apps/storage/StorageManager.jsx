@@ -75,9 +75,9 @@ export default function StorageManager() {
       </div>
 
       <div className={styles.main}>
-        {error && <div className={styles.alertBanner} style={{background:'rgba(239,68,68,0.15)',color:'#f87171'}}>{error}</div>}
-        {critAlerts.map((a,i)=>(<div key={`c${i}`} className={styles.alertBanner} style={{background:'rgba(239,68,68,0.15)',color:'#f87171'}}><AlertTriangleIcon size={16}/> {a.message}</div>))}
-        {warnAlerts.map((a,i)=>(<div key={`w${i}`} className={styles.alertBanner} style={{background:'rgba(245,158,11,0.15)',color:'#fbbf24'}}><AlertTriangleIcon size={16}/> {a.message}</div>))}
+        {error && <div className={styles.alertBanner} style={{background:'rgba(239,68,68,0.15)',color:'var(--color-danger)'}}>{error}</div>}
+        {critAlerts.map((a,i)=>(<div key={`c${i}`} className={styles.alertBanner} style={{background:'rgba(239,68,68,0.15)',color:'var(--color-danger)'}}><AlertTriangleIcon size={16}/> {a.message}</div>))}
+        {warnAlerts.map((a,i)=>(<div key={`w${i}`} className={styles.alertBanner} style={{background:'rgba(245,158,11,0.15)',color:'var(--color-warning)'}}><AlertTriangleIcon size={16}/> {a.message}</div>))}
 
         {!hasPools && view!=='create' && view!=='restore' && <NoPools onCreateClick={()=>setView('create')} onRestoreClick={()=>setView('restore')} eligible={(disks?.eligible||[]).length}/>}
         {view==='overview' && hasPools && <OverviewPage pools={pools} allDisks={allDisks}/>}
@@ -104,7 +104,7 @@ function NoPools({onCreateClick, onRestoreClick, eligible}) {
             <button className={styles.btnPrimary} onClick={onCreateClick}><PlusIcon size={16}/> Create Your First Pool ({eligible} disk{eligible!==1?'s':''} available)</button>
             <button className={styles.btn} onClick={onRestoreClick} style={{display:'flex',alignItems:'center',gap:6}}><DownloadIcon size={16}/> Restore Existing Pool</button>
           </div>
-        : <p style={{color:'#f87171'}}>No eligible disks detected. Connect HDD or SSD drives to create a pool.</p>}
+        : <p style={{color:'var(--color-danger)'}}>No eligible disks detected. Connect HDD or SSD drives to create a pool.</p>}
     </div>
   );
 }
@@ -119,7 +119,7 @@ function OverviewPage({pools, allDisks}) {
       <div className={styles.stat}><div className={styles.statValue} style={{color:'var(--accent)'}}>{pools.length}</div><div className={styles.statLabel}>Pool{pools.length!==1?'s':''}</div></div>
       <div className={styles.stat}><div className={styles.statValue} style={{color:'var(--accent-green)'}}>{formatBytes(totalUsed)}</div><div className={styles.statLabel}>Used / {formatBytes(totalSize)}</div></div>
       <div className={styles.stat}><div className={styles.statValue} style={{color:'var(--accent-blue)'}}>{allDisks.length}</div><div className={styles.statLabel}>Physical Disks</div></div>
-      <div className={styles.stat}><div className={styles.statValue} style={{color:allHealthy?'var(--accent-green)':'#f87171'}}>{allHealthy?'Healthy':'Degraded'}</div><div className={styles.statLabel}>Status</div></div>
+      <div className={styles.stat}><div className={styles.statValue} style={{color:allHealthy?'var(--accent-green)':'var(--color-danger)'}}>{allHealthy?'Healthy':'Degraded'}</div><div className={styles.statLabel}>Status</div></div>
     </div>
     {pools.map(pool=>(<PoolCard key={pool.name} pool={pool}/>))}
   </div>);
@@ -134,7 +134,7 @@ function PoolCard({pool, onDestroy}) {
           <div className={styles.raidSub}>{pool.raidLevel.toUpperCase()} · {pool.filesystem} · {pool.mountPoint} · {pool.disks.length} disk{pool.disks.length!==1?'s':''}</div>
         </div>
         <div className={styles.statusBadge}>
-          <span className={styles.statusDot} style={{background:pool.status==='active'?'var(--accent-green)':pool.status==='degraded'?'#f87171':'#fbbf24'}}/>
+          <span className={styles.statusDot} style={{background:pool.status==='active'?'var(--accent-green)':pool.status==='degraded'?'var(--color-danger)':'var(--color-warning)'}}/>
           {pool.status==='active'?'Healthy':pool.status==='degraded'?'DEGRADED':pool.status}
         </div>
       </div>
@@ -143,7 +143,7 @@ function PoolCard({pool, onDestroy}) {
           const failed = pool.members?.find(m=>m.device?.includes(disk.replace('/dev/','')))?.failed;
           return (<div key={i} className={`${styles.raidDiskBox} ${failed?styles.raidFailed:styles.raidActive}`}>
             <div className={styles.raidDiskLabel}>Disk {i+1}</div><span>{disk}</span>
-            {failed && <span style={{color:'#f87171',fontSize:'0.75rem'}}>FAILED</span>}
+            {failed && <span style={{color:'var(--color-danger)',fontSize:'0.75rem'}}>FAILED</span>}
           </div>);
         })}
       </div>
@@ -151,19 +151,19 @@ function PoolCard({pool, onDestroy}) {
         <div style={{flex:1,display:'flex',alignItems:'center',gap:8}}>
           {pool.total>0 && (<>
             <span style={{fontSize:'var(--text-xs)',color:'var(--text-muted)',whiteSpace:'nowrap'}}>{formatBytes(pool.used)} / {formatBytes(pool.total)}</span>
-            <div className={styles.progressBar} style={{flex:1}}><div className={styles.progressFill} style={{width:`${pool.usagePercent}%`,background:pool.usagePercent>90?'#f87171':pool.usagePercent>75?'#fbbf24':'var(--accent-green)'}}/></div>
+            <div className={styles.progressBar} style={{flex:1}}><div className={styles.progressFill} style={{width:`${pool.usagePercent}%`,background:pool.usagePercent>90?'var(--color-danger)':pool.usagePercent>75?'var(--color-warning)':'var(--accent-green)'}}/></div>
             <span style={{fontSize:'var(--text-xs)',color:'var(--text-muted)'}}>{pool.usagePercent}%</span>
           </>)}
         </div>
         {onDestroy && (
           <button onClick={()=>onDestroy(pool)} className={styles.btn}
-            style={{fontSize:'var(--text-xs)',padding:'3px 8px',color:'#f87171',borderColor:'rgba(239,68,68,0.3)',whiteSpace:'nowrap'}}>
+            style={{fontSize:'var(--text-xs)',padding:'3px 8px',color:'var(--color-danger)',borderColor:'rgba(239,68,68,0.3)',whiteSpace:'nowrap'}}>
             Destroy
           </button>
         )}
       </div>
       {pool.rebuildProgress!==null && (
-        <div className={styles.raidSync}><span>Rebuild:</span><div className={styles.progressBar}><div className={styles.progressFill} style={{width:`${pool.rebuildProgress}%`,background:'#fbbf24'}}/></div><span>{pool.rebuildProgress}%</span></div>
+        <div className={styles.raidSync}><span>Rebuild:</span><div className={styles.progressBar}><div className={styles.progressFill} style={{width:`${pool.rebuildProgress}%`,background:'var(--color-warning)'}}/></div><span>{pool.rebuildProgress}%</span></div>
       )}
     </div>
   );
@@ -188,13 +188,13 @@ function DiskItem({disk, color, onWipe}) {
         </div>
       </div>
       {disk.needsWipe && !disk.isBoot && onWipe && (
-        <button onClick={()=>onWipe(disk)} className={styles.btn} style={{fontSize:'var(--text-xs)',padding:'4px 10px',color:'#fbbf24',borderColor:'rgba(251,191,36,0.3)'}}>
+        <button onClick={()=>onWipe(disk)} className={styles.btn} style={{fontSize:'var(--text-xs)',padding:'4px 10px',color:'var(--color-warning)',borderColor:'rgba(251,191,36,0.3)'}}>
           Wipe
         </button>
       )}
       <div className={styles.statusBadge}>
         {disk.smart==='PASSED'?<><CheckCircleIcon size={14} style={{color:'var(--accent-green)'}}/> Healthy</>:
-         disk.smart==='FAILED'?<><XCircleIcon size={14} style={{color:'#f87171'}}/> FAILED</>:
+         disk.smart==='FAILED'?<><XCircleIcon size={14} style={{color:'var(--color-danger)'}}/> FAILED</>:
          <span style={{color:'var(--text-muted)'}}>—</span>}
       </div>
     </div>
@@ -239,19 +239,19 @@ function DisksPage({disks, allDisks, token, onRefresh}) {
     </div>))}
 
     {wipeConfirm&&(
-      <div style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,0.7)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:9999}}>
-        <div style={{background:'var(--surface-glass,#1a1a2e)',borderRadius:12,padding:32,maxWidth:480,width:'90%',border:'1px solid rgba(251,191,36,0.3)'}}>
-          <h3 style={{color:'#fbbf24',marginBottom:12}}>⚠ Wipe Disk</h3>
+      <div className={styles.modalOverlay}>
+        <div className={styles.modalBody} style={{borderColor:'var(--color-warning)'}}>
+          <h3 style={{color:'var(--color-warning)',marginBottom:12}}>⚠ Wipe Disk</h3>
           <p style={{color:'var(--text-muted)',marginBottom:8}}>This will remove all partitions, RAID superblocks, and LVM metadata from:</p>
           <p style={{color:'var(--text-primary)',fontWeight:600,marginBottom:16}}>{wipeConfirm.path} — {wipeConfirm.model} ({wipeConfirm.sizeFormatted})</p>
           <p style={{color:'var(--text-muted)',marginBottom:4,fontSize:'var(--text-sm)'}}>Type <strong style={{color:'var(--text-primary)'}}>{wipeConfirm.name.replace('/dev/','')}</strong> to confirm:</p>
-          {wipeError&&<p style={{color:'#f87171',fontSize:'var(--text-sm)',marginBottom:8}}>{wipeError}</p>}
+          {wipeError&&<p style={{color:'var(--color-danger)',fontSize:'var(--text-sm)',marginBottom:8}}>{wipeError}</p>}
           <input type="text" value={wipeInput} onChange={e=>setWipeInput(e.target.value)} autoFocus placeholder={wipeConfirm.name.replace('/dev/','')}
-            style={{width:'100%',padding:'8px 12px',borderRadius:6,border:'1px solid rgba(255,255,255,0.1)',background:'rgba(0,0,0,0.3)',color:'var(--text-primary)',fontSize:'var(--text-sm)',marginBottom:16,boxSizing:'border-box'}}/>
-          <div style={{display:'flex',gap:12,justifyContent:'flex-end'}}>
+            className={styles.modalInput}/>
+          <div className={styles.modalActions}>
             <button className={styles.btn} onClick={()=>{setWipeConfirm(null);setWipeInput('');setWipeError('');}}>Cancel</button>
-            <button className={styles.btnPrimary} onClick={doWipe} disabled={wipeInput!==wipeConfirm.name.replace('/dev/','')||wiping}
-              style={{background:wipeInput===wipeConfirm.name.replace('/dev/','')?'#d97706':'rgba(217,119,6,0.3)'}}>
+            <button className={styles.btnDanger} onClick={doWipe} disabled={wipeInput!==wipeConfirm.name.replace('/dev/','')||wiping}
+              style={{background:wipeInput===wipeConfirm.name.replace('/dev/','')?'var(--color-warning)':undefined,opacity:wipeInput===wipeConfirm.name.replace('/dev/','')?1:0.4}}>
               {wiping?'Wiping...':'Wipe Disk'}
             </button>
           </div>
@@ -291,18 +291,18 @@ function PoolsPage({pools, token, onRefresh}) {
     ))}
 
     {destroyConfirm&&(
-      <div style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,0.7)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:9999}}>
-        <div style={{background:'var(--surface-glass,#1a1a2e)',borderRadius:12,padding:32,maxWidth:480,width:'90%',border:'1px solid rgba(239,68,68,0.3)'}}>
-          <h3 style={{color:'#f87171',marginBottom:12}}>⚠ Destroy Pool</h3>
+      <div className={styles.modalOverlay}>
+        <div className={styles.modalBody} style={{borderColor:'var(--color-danger)'}}>
+          <h3 style={{color:'var(--color-danger)',marginBottom:12}}>⚠ Destroy Pool</h3>
           <p style={{color:'var(--text-muted)',marginBottom:8}}>This will permanently destroy pool <strong style={{color:'var(--text-primary)'}}>{destroyConfirm.name}</strong>, unmount it, and remove the RAID array. All data will be lost.</p>
           <p style={{color:'var(--text-muted)',marginBottom:4,fontSize:'var(--text-sm)'}}>Type <strong style={{color:'var(--text-primary)'}}>{destroyConfirm.name}</strong> to confirm:</p>
-          {destroyError&&<p style={{color:'#f87171',fontSize:'var(--text-sm)',marginBottom:8}}>{destroyError}</p>}
+          {destroyError&&<p style={{color:'var(--color-danger)',fontSize:'var(--text-sm)',marginBottom:8}}>{destroyError}</p>}
           <input type="text" value={destroyInput} onChange={e=>setDestroyInput(e.target.value)} autoFocus placeholder={destroyConfirm.name}
-            style={{width:'100%',padding:'8px 12px',borderRadius:6,border:'1px solid rgba(255,255,255,0.1)',background:'rgba(0,0,0,0.3)',color:'var(--text-primary)',fontSize:'var(--text-sm)',marginBottom:16,boxSizing:'border-box'}}/>
-          <div style={{display:'flex',gap:12,justifyContent:'flex-end'}}>
+            className={styles.modalInput}/>
+          <div className={styles.modalActions}>
             <button className={styles.btn} onClick={()=>setDestroyConfirm(null)}>Cancel</button>
-            <button className={styles.btnPrimary} onClick={doDestroy} disabled={destroyInput!==destroyConfirm.name||destroying}
-              style={{background:destroyInput===destroyConfirm.name?'#dc2626':'rgba(220,38,38,0.3)'}}>
+            <button className={styles.btnDanger} onClick={doDestroy} disabled={destroyInput!==destroyConfirm.name||destroying}
+              style={{opacity:destroyInput===destroyConfirm.name?1:0.4}}>
               {destroying?'Destroying...':'Destroy Pool'}
             </button>
           </div>
@@ -317,14 +317,14 @@ function SmartPage({allDisks}) {
     <div className={styles.sectionHeader}><h3>SMART Health</h3></div>
     {allDisks.map((d,i)=>(
       <div key={i} className={styles.diskItem}>
-        <div className={styles.diskIcon} style={{background:d.smart==='PASSED'?'rgba(34,197,94,0.1)':d.smart==='FAILED'?'rgba(239,68,68,0.1)':'rgba(100,100,100,0.1)',color:d.smart==='PASSED'?'var(--accent-green)':d.smart==='FAILED'?'#f87171':'var(--text-muted)'}}>
+        <div className={styles.diskIcon} style={{background:d.smart==='PASSED'?'var(--color-success-bg)':d.smart==='FAILED'?'var(--color-danger-bg)':'var(--bg-hover)',color:d.smart==='PASSED'?'var(--accent-green)':d.smart==='FAILED'?'var(--color-danger)':'var(--text-muted)'}}>
           {d.smart==='PASSED'?<CheckCircleIcon size={22}/>:d.smart==='FAILED'?<XCircleIcon size={22}/>:<ActivityIcon size={22}/>}
         </div>
         <div className={styles.diskInfo}>
           <div className={styles.diskName}>{d.path} — {d.model}</div>
           <div className={styles.diskDetail}>{d.sizeFormatted}{d.temperature?` · ${d.temperature}°C`:''}{d.serial?` · ${d.serial}`:''}</div>
         </div>
-        <div className={styles.statusBadge} style={{color:d.smart==='PASSED'?'var(--accent-green)':d.smart==='FAILED'?'#f87171':'var(--text-muted)'}}>{d.smart||'N/A'}</div>
+        <div className={styles.statusBadge} style={{color:d.smart==='PASSED'?'var(--accent-green)':d.smart==='FAILED'?'var(--color-danger)':'var(--text-muted)'}}>{d.smart||'N/A'}</div>
       </div>
     ))}
   </div>);
@@ -381,14 +381,14 @@ function CreatePoolPage({disks, token, onCreated}) {
 
   return (<div>
     <div className={styles.sectionHeader}><h3>Create Storage Pool</h3></div>
-    {success&&<div className={styles.alertBanner} style={{background:'rgba(34,197,94,0.15)',color:'#4ade80'}}><CheckCircleIcon size={16}/> {success}</div>}
-    {error&&<div className={styles.alertBanner} style={{background:'rgba(239,68,68,0.15)',color:'#f87171'}}>{error}</div>}
+    {success&&<div className={styles.alertBanner} style={{background:'rgba(34,197,94,0.15)',color:'var(--color-success)'}}><CheckCircleIcon size={16}/> {success}</div>}
+    {error&&<div className={styles.alertBanner} style={{background:'rgba(239,68,68,0.15)',color:'var(--color-danger)'}}>{error}</div>}
 
     <div className={styles.raidCard}>
       <div className={styles.raidTitle}>Step 1: Select Disks</div>
       <p style={{color:'var(--text-muted)',fontSize:'var(--text-sm)',margin:'8px 0 16px'}}>All data on selected disks will be permanently destroyed.</p>
       {eligible.length===0
-        ?<p style={{color:'#f87171'}}>No eligible disks. Connect HDD or SSD drives.</p>
+        ?<p style={{color:'var(--color-danger)'}}>No eligible disks. Connect HDD or SSD drives.</p>
         :eligible.map((d,i)=>(
           <div key={i} className={styles.diskItem} onClick={()=>toggle(d.path)}
             style={{cursor:'pointer',border:selectedDisks.includes(d.path)?'1px solid var(--accent)':'1px solid transparent',borderRadius:8}}>
@@ -412,7 +412,7 @@ function CreatePoolPage({disks, token, onCreated}) {
               background:raidLevel===o.v?'rgba(124,58,237,0.1)':'transparent',border:raidLevel===o.v?'1px solid var(--accent)':'1px solid transparent',
               opacity:ok?1:0.4,cursor:ok?'pointer':'not-allowed'}}>
               <input type="radio" name="raid" value={o.v} checked={raidLevel===o.v} disabled={!ok} onChange={e=>setRaidLevel(e.target.value)}/>
-              <div><div style={{fontWeight:600,color:o.v==='0'?'#f87171':'var(--text-primary)'}}>{o.label}</div>
+              <div><div style={{fontWeight:600,color:o.v==='0'?'var(--color-danger)':'var(--text-primary)'}}>{o.label}</div>
               <div style={{fontSize:'var(--text-xs)',color:'var(--text-muted)'}}>{o.desc} (Min {o.min} disks)</div></div>
             </label>);
           })}
@@ -426,27 +426,27 @@ function CreatePoolPage({disks, token, onCreated}) {
         <div style={{display:'flex',gap:12,marginTop:12,flexWrap:'wrap',alignItems:'center'}}>
           <input type="text" placeholder="Pool name (e.g. storage)" value={poolName}
             onChange={e=>setPoolName(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,''))}
-            style={{flex:1,minWidth:200,padding:'8px 12px',borderRadius:6,border:'1px solid rgba(255,255,255,0.1)',background:'rgba(0,0,0,0.2)',color:'var(--text-primary)',fontSize:'var(--text-sm)'}}/>
-          <select value={filesystem} onChange={e=>setFilesystem(e.target.value)}
-            style={{padding:'8px 12px',borderRadius:6,border:'1px solid rgba(255,255,255,0.1)',background:'rgba(0,0,0,0.2)',color:'var(--text-primary)'}}>
+            className={styles.formInput} style={{flex:1,minWidth:200}}/>
+          <select value={filesystem} onChange={e=>setFilesystem(e.target.value)} className={styles.formInput}>
+            <option value="ext4">ext4 (Recommended)</option><option value="xfs">XFS (Large files)</option>
+          </select>
             <option value="ext4">ext4 (Recommended)</option><option value="xfs">XFS (Large files)</option>
           </select>
           <button className={styles.btnPrimary} onClick={handleCreateClick} disabled={creating||!poolName.trim()}>
             {creating?'Creating...':'Create Pool'}
           </button>
         </div>
-        {selectedDisks.length===1&&<p style={{color:'#fbbf24',fontSize:'var(--text-xs)',marginTop:8}}>Single disk — no redundancy. Data lost if disk fails.</p>}
-        {raidLevel==='0'&&selectedDisks.length>=2&&<p style={{color:'#f87171',fontSize:'var(--text-xs)',marginTop:8,fontWeight:600}}>WARNING: RAID 0 — ANY disk failure = TOTAL data loss.</p>}
+        {selectedDisks.length===1&&<p style={{color:'var(--color-warning)',fontSize:'var(--text-xs)',marginTop:8}}>Single disk — no redundancy. Data lost if disk fails.</p>}
+        {raidLevel==='0'&&selectedDisks.length>=2&&<p style={{color:'var(--color-danger)',fontSize:'var(--text-xs)',marginTop:8,fontWeight:600}}>WARNING: RAID 0 — ANY disk failure = TOTAL data loss.</p>}
       </div>
     )}
 
-    {/* Confirmation dialog */}
     {showConfirm&&(
-      <div style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,0.7)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:9999}}>
-        <div style={{background:'var(--surface-glass,#1a1a2e)',borderRadius:12,padding:32,maxWidth:480,width:'90%',border:'1px solid rgba(239,68,68,0.3)'}}>
-          <h3 style={{color:'#f87171',marginBottom:12}}>⚠ Confirm Data Destruction</h3>
+      <div className={styles.modalOverlay}>
+        <div className={styles.modalBody} style={{borderColor:'var(--color-danger)'}}>
+          <h3 style={{color:'var(--color-danger)',marginBottom:12}}>⚠ Confirm Data Destruction</h3>
           <p style={{color:'var(--text-muted)',marginBottom:8}}>
-            This will <strong style={{color:'#f87171'}}>permanently destroy ALL data</strong> on the following disks:
+            This will <strong style={{color:'var(--color-danger)'}}>permanently destroy ALL data</strong> on the following disks:
           </p>
           <ul style={{color:'var(--text-primary)',marginBottom:16,paddingLeft:20}}>
             {selectedDisks.map(d=>{
@@ -461,13 +461,12 @@ function CreatePoolPage({disks, token, onCreated}) {
             Type <strong style={{color:'var(--text-primary)'}}>{poolName}</strong> to confirm:
           </p>
           <input type="text" value={confirmText} onChange={e=>setConfirmText(e.target.value)} placeholder={poolName}
-            autoFocus
-            style={{width:'100%',padding:'8px 12px',borderRadius:6,border:'1px solid rgba(255,255,255,0.1)',background:'rgba(0,0,0,0.3)',color:'var(--text-primary)',fontSize:'var(--text-sm)',marginBottom:16,boxSizing:'border-box'}}/>
-          <div style={{display:'flex',gap:12,justifyContent:'flex-end'}}>
+            autoFocus className={styles.modalInput}/>
+          <div className={styles.modalActions}>
             <button className={styles.btn} onClick={()=>{setShowConfirm(false);setConfirmText('');}}>Cancel</button>
-            <button className={styles.btnPrimary} onClick={confirmAndCreate}
+            <button className={styles.btnDanger} onClick={confirmAndCreate}
               disabled={confirmText!==poolName||creating}
-              style={{background:confirmText===poolName?'#dc2626':'rgba(220,38,38,0.3)',opacity:confirmText===poolName?1:0.5}}>
+              style={{opacity:confirmText===poolName?1:0.4}}>
               {creating?'Creating...':'Destroy Data & Create Pool'}
             </button>
           </div>
@@ -523,10 +522,10 @@ function RestorePoolPage({token, onRestored}) {
       Scan your disks for NimbusOS pools from previous installations. Restoring a pool will mount it and recover your data without formatting.
     </p>
 
-    {error && <div className={styles.alertBanner} style={{background:'rgba(239,68,68,0.15)',color:'#f87171'}}><AlertTriangleIcon size={16}/> {error}</div>}
+    {error && <div className={styles.alertBanner} style={{background:'rgba(239,68,68,0.15)',color:'var(--color-danger)'}}><AlertTriangleIcon size={16}/> {error}</div>}
 
     {result && (
-      <div className={styles.alertBanner} style={{background:'rgba(34,197,94,0.15)',color:'#4ade80',display:'flex',alignItems:'center',gap:8}}>
+      <div className={styles.alertBanner} style={{background:'rgba(34,197,94,0.15)',color:'var(--color-success)',display:'flex',alignItems:'center',gap:8}}>
         <CheckCircleIcon size={16}/> Pool "{result.pool.name}" restored successfully!
         {result.data.hasDocker && ' Docker volumes recovered.'}
         {result.data.hasShares && ' Shared folders recovered.'}
@@ -558,7 +557,7 @@ function RestorePoolPage({token, onRestored}) {
             <div className={styles.raidTitle}>
               <HardDriveIcon size={16}/>
               {p.pool.name}
-              {p.pool.legacy && <span style={{fontSize:'var(--text-xs)',color:'#fbbf24',marginLeft:8}}>Beta 1</span>}
+              {p.pool.legacy && <span style={{fontSize:'var(--text-xs)',color:'var(--color-warning)',marginLeft:8}}>Beta 1</span>}
             </div>
             <div className={styles.raidSub}>
               {p.device} · {p.label || 'No label'} · {p.pool.raidLevel || 'single'}
