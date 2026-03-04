@@ -640,11 +640,25 @@ function wipeDisk(diskPath) {
         if (line.includes(diskName)) {
           const arrayMatch = line.match(/^(md\d+)/);
           if (arrayMatch) {
-            console.log(`[Storage] Stopping array /dev/${arrayMatch[1]} (contains ${diskPath})`);
-            execSync(`mdadm --stop /dev/${arrayMatch[1]} 2>/dev/null || true`, { timeout: 10000 });
+            const mdDev = `/dev/${arrayMatch[1]}`;
+            console.log(`[Storage] Found array ${mdDev} (contains ${diskPath})`);
+            // Unmount the array first
+            const mdMount = run(`findmnt -n -o TARGET ${mdDev} 2>/dev/null`)?.trim();
+            if (mdMount) {
+              console.log(`[Storage] Unmounting ${mdDev} from ${mdMount}`);
+              execSync(`umount -f ${mdDev} 2>/dev/null || true`, { timeout: 10000 });
+              // Remove fstab entries for this array
+              execSync(`sed -i '\\|${arrayMatch[1]}|d' /etc/fstab 2>/dev/null || true`, { timeout: 5000 });
+              execSync(`sed -i '\\|${mdMount.replace(/\//g, '\\/')}|d' /etc/fstab 2>/dev/null || true`, { timeout: 5000 });
+            }
+            console.log(`[Storage] Stopping array ${mdDev}`);
+            execSync(`mdadm --stop ${mdDev} 2>/dev/null || true`, { timeout: 15000 });
           }
         }
       }
+      
+      // Also remove from mdadm.conf
+      execSync('mdadm --detail --scan > /etc/mdadm/mdadm.conf 2>/dev/null || true', { timeout: 5000 });
       
       // 3. Clear RAID superblocks from all partitions
       for (const part of diskInfo.partitions) {
@@ -886,7 +900,7 @@ function checkStorageHealth() {
 }
 
 // Start storage monitoring interval
-setInterval(checkStorageHealth, 60000); // Every 60s
+setInterval(checkStorageHealth, 300000); // Every 5min
 setInterval(() => { if (hasPool()) backupConfigToPool(); }, 6 * 60 * 60 * 1000); // Every 6h
 
 // ═══════════════════════════════════
