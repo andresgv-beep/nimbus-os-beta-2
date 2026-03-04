@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { HardDriveIcon, ShieldIcon, ActivityIcon, PlusIcon, RefreshCwIcon, AlertTriangleIcon, CheckCircleIcon, XCircleIcon } from '@icons';
+import { HardDriveIcon, ShieldIcon, ActivityIcon, PlusIcon, RefreshCwIcon, AlertTriangleIcon, CheckCircleIcon, XCircleIcon, DownloadIcon } from '@icons';
 import { useAuth } from '@context';
 import styles from './StorageManager.module.css';
 
@@ -66,6 +66,9 @@ export default function StorageManager() {
         <div className={`${styles.sidebarItem} ${view==='create'?styles.active:''}`} onClick={()=>setView('create')}>
           <span className={styles.sidebarIcon}><PlusIcon size={16}/></span>Create Pool
         </div>
+        <div className={`${styles.sidebarItem} ${view==='restore'?styles.active:''}`} onClick={()=>setView('restore')}>
+          <span className={styles.sidebarIcon}><DownloadIcon size={16}/></span>Restore Pool
+        </div>
         <div className={styles.sidebarItem} onClick={rescan}>
           <span className={styles.sidebarIcon}><RefreshCwIcon size={16}/></span>Rescan Disks
         </div>
@@ -76,18 +79,19 @@ export default function StorageManager() {
         {critAlerts.map((a,i)=>(<div key={`c${i}`} className={styles.alertBanner} style={{background:'rgba(239,68,68,0.15)',color:'#f87171'}}><AlertTriangleIcon size={16}/> {a.message}</div>))}
         {warnAlerts.map((a,i)=>(<div key={`w${i}`} className={styles.alertBanner} style={{background:'rgba(245,158,11,0.15)',color:'#fbbf24'}}><AlertTriangleIcon size={16}/> {a.message}</div>))}
 
-        {!hasPools && view!=='create' && <NoPools onCreateClick={()=>setView('create')} eligible={(disks?.eligible||[]).length}/>}
+        {!hasPools && view!=='create' && view!=='restore' && <NoPools onCreateClick={()=>setView('create')} onRestoreClick={()=>setView('restore')} eligible={(disks?.eligible||[]).length}/>}
         {view==='overview' && hasPools && <OverviewPage pools={pools} allDisks={allDisks}/>}
         {view==='disks' && <DisksPage disks={disks} allDisks={allDisks} token={token} onRefresh={fetchData}/>}
         {view==='pools' && <PoolsPage pools={pools} token={token} onRefresh={fetchData}/>}
         {view==='smart' && <SmartPage allDisks={allDisks}/>}
         {view==='create' && <CreatePoolPage disks={disks} token={token} onCreated={()=>{setView('overview');fetchData();}}/>}
+        {view==='restore' && <RestorePoolPage token={token} onRestored={()=>{setView('overview');fetchData();}}/>}
       </div>
     </div>
   );
 }
 
-function NoPools({onCreateClick, eligible}) {
+function NoPools({onCreateClick, onRestoreClick, eligible}) {
   return (
     <div style={{textAlign:'center',padding:'60px 20px'}}>
       <HardDriveIcon size={64} style={{color:'var(--text-muted)',marginBottom:16}}/>
@@ -96,7 +100,10 @@ function NoPools({onCreateClick, eligible}) {
         Create a storage pool to unlock all NimbusOS features: App Store, Docker, File Manager, and Shared Folders.
       </p>
       {eligible > 0
-        ? <button className={styles.btnPrimary} onClick={onCreateClick}><PlusIcon size={16}/> Create Your First Pool ({eligible} disk{eligible!==1?'s':''} available)</button>
+        ? <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
+            <button className={styles.btnPrimary} onClick={onCreateClick}><PlusIcon size={16}/> Create Your First Pool ({eligible} disk{eligible!==1?'s':''} available)</button>
+            <button className={styles.btn} onClick={onRestoreClick} style={{display:'flex',alignItems:'center',gap:6}}><DownloadIcon size={16}/> Restore Existing Pool</button>
+          </div>
         : <p style={{color:'#f87171'}}>No eligible disks detected. Connect HDD or SSD drives to create a pool.</p>}
     </div>
   );
@@ -467,5 +474,140 @@ function CreatePoolPage({disks, token, onCreated}) {
         </div>
       </div>
     )}
+  </div>);
+}
+
+function RestorePoolPage({token, onRestored}) {
+  const [scanning, setScanning] = useState(false);
+  const [pools, setPools] = useState(null);
+  const [restoring, setRestoring] = useState(null);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+  const scan = async () => {
+    setScanning(true); setError(''); setPools(null); setResult(null);
+    try {
+      const res = await fetch(`${API}/api/storage/restorable`, { headers });
+      const data = await res.json();
+      setPools(data.pools || []);
+    } catch { setError('Failed to scan for pools'); }
+    setScanning(false);
+  };
+
+  useEffect(() => { scan(); }, []);
+
+  const restore = async (pool) => {
+    setRestoring(pool.device); setError(''); setResult(null);
+    try {
+      const res = await fetch(`${API}/api/storage/pool/restore`, {
+        method: 'POST', headers,
+        body: JSON.stringify({ device: pool.device, name: pool.pool.name }),
+      });
+      const data = await res.json();
+      if (data.error) { setError(data.error); }
+      else { setResult(data); setTimeout(onRestored, 3000); }
+    } catch { setError('Restore failed'); }
+    setRestoring(null);
+  };
+
+  return (<div>
+    <div className={styles.sectionHeader}>
+      <h3>Restore Pool</h3>
+      <button className={styles.btn} onClick={scan} disabled={scanning} style={{display:'flex',alignItems:'center',gap:6}}>
+        <RefreshCwIcon size={14}/> {scanning ? 'Scanning...' : 'Rescan'}
+      </button>
+    </div>
+
+    <p style={{color:'var(--text-muted)',fontSize:'var(--text-sm)',marginBottom:20}}>
+      Scan your disks for NimbusOS pools from previous installations. Restoring a pool will mount it and recover your data without formatting.
+    </p>
+
+    {error && <div className={styles.alertBanner} style={{background:'rgba(239,68,68,0.15)',color:'#f87171'}}><AlertTriangleIcon size={16}/> {error}</div>}
+
+    {result && (
+      <div className={styles.alertBanner} style={{background:'rgba(34,197,94,0.15)',color:'#4ade80',display:'flex',alignItems:'center',gap:8}}>
+        <CheckCircleIcon size={16}/> Pool "{result.pool.name}" restored successfully!
+        {result.data.hasDocker && ' Docker volumes recovered.'}
+        {result.data.hasShares && ' Shared folders recovered.'}
+        {result.restoredConfig && ' Configuration backup applied.'}
+      </div>
+    )}
+
+    {scanning && (
+      <div className={styles.raidCard} style={{textAlign:'center',padding:40}}>
+        <RefreshCwIcon size={32} style={{color:'var(--text-muted)',marginBottom:12}}/>
+        <p style={{color:'var(--text-muted)'}}>Scanning disks for NimbusOS pools...</p>
+      </div>
+    )}
+
+    {pools && pools.length === 0 && !scanning && (
+      <div className={styles.raidCard} style={{textAlign:'center',padding:40}}>
+        <XCircleIcon size={32} style={{color:'var(--text-muted)',marginBottom:12}}/>
+        <p style={{color:'var(--text-muted)',marginBottom:8}}>No restorable pools found.</p>
+        <p style={{color:'var(--text-muted)',fontSize:'var(--text-xs)'}}>
+          NimbusOS pools are identified by a .nimbus-pool.json file or a nimbus-* disk label.
+        </p>
+      </div>
+    )}
+
+    {pools && pools.map((p, i) => (
+      <div key={i} className={styles.raidCard} style={{marginBottom:12}}>
+        <div className={styles.raidHeader}>
+          <div>
+            <div className={styles.raidTitle}>
+              <HardDriveIcon size={16}/>
+              {p.pool.name}
+              {p.pool.legacy && <span style={{fontSize:'var(--text-xs)',color:'#fbbf24',marginLeft:8}}>Beta 1</span>}
+            </div>
+            <div className={styles.raidSub}>
+              {p.device} · {p.label || 'No label'} · {p.pool.raidLevel || 'single'}
+              {p.pool.filesystem ? ` · ${p.pool.filesystem}` : ''}
+              {p.size.totalFormatted !== '—' ? ` · ${p.size.usedFormatted} used / ${p.size.totalFormatted}` : ''}
+            </div>
+          </div>
+          {p.alreadyConfigured && <div className={styles.statusBadge}><CheckCircleIcon size={14}/> Already Active</div>}
+        </div>
+
+        <div style={{display:'flex',gap:16,marginTop:12,flexWrap:'wrap'}}>
+          {p.data.hasDocker && (
+            <div style={{display:'flex',alignItems:'center',gap:6,fontSize:'var(--text-xs)',color:'var(--accent-green)'}}>
+              <CheckCircleIcon size={14}/> Docker volumes
+            </div>
+          )}
+          {p.data.hasShares && (
+            <div style={{display:'flex',alignItems:'center',gap:6,fontSize:'var(--text-xs)',color:'var(--accent-green)'}}>
+              <CheckCircleIcon size={14}/> Shared folders
+            </div>
+          )}
+          {p.data.hasBackup && (
+            <div style={{display:'flex',alignItems:'center',gap:6,fontSize:'var(--text-xs)',color:'var(--accent-green)'}}>
+              <CheckCircleIcon size={14}/> Config backup
+            </div>
+          )}
+          {!p.data.hasDocker && !p.data.hasShares && !p.data.hasBackup && (
+            <div style={{fontSize:'var(--text-xs)',color:'var(--text-muted)'}}>No recognized data detected</div>
+          )}
+        </div>
+
+        {p.pool.createdAt && (
+          <div style={{fontSize:'var(--text-xs)',color:'var(--text-muted)',marginTop:8}}>
+            Created: {new Date(p.pool.createdAt).toLocaleDateString()}
+            {p.pool.nimbusVersion ? ` · NimbusOS ${p.pool.nimbusVersion}` : ''}
+          </div>
+        )}
+
+        {!p.alreadyConfigured && (
+          <div style={{marginTop:16}}>
+            <button className={styles.btnPrimary} onClick={() => restore(p)}
+              disabled={restoring === p.device}
+              style={{display:'flex',alignItems:'center',gap:6}}>
+              <DownloadIcon size={14}/>
+              {restoring === p.device ? 'Restoring...' : `Restore "${p.pool.name}"`}
+            </button>
+          </div>
+        )}
+      </div>
+    ))}
   </div>);
 }
