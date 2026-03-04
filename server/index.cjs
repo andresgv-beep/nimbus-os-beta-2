@@ -328,7 +328,7 @@ const server = http.createServer((req, res) => {
     if (url === '/api/system/update/check' && method === 'GET') {
       try {
         const currentVersion = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8')).version || '0.0.0';
-        const latestVersion = JSON.parse(execSync('curl -fsSL "https://raw.githubusercontent.com/andresgv-beep/nimbus-os-beta-1/main/package.json" 2>/dev/null', { timeout: 10000, encoding: 'utf8' })).version || '0.0.0';
+        const latestVersion = JSON.parse(execSync('curl -fsSL "https://raw.githubusercontent.com/andresgv-beep/nimbus-os-beta-2/main/package.json" 2>/dev/null', { timeout: 10000, encoding: 'utf8' })).version || '0.0.0';
         res.writeHead(200, CORS_HEADERS);
         return res.end(JSON.stringify({ currentVersion, latestVersion, updateAvailable: latestVersion !== currentVersion, installDir: '/opt/nimbusos' }));
       } catch (err) { res.writeHead(200, CORS_HEADERS); return res.end(JSON.stringify({ error: 'Failed: ' + err.message })); }
