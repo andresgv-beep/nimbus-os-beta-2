@@ -42,20 +42,23 @@ const {
 // System routes (hardware monitoring)
 // ═══════════════════════════════════
 const routes = {
-  '/api/system':        () => hw.getSystemSummary(),
-  '/api/cpu':           () => hw.getCpuUsage(),
-  '/api/memory':        () => hw.getMemory(),
-  '/api/gpu':           () => hw.getGpu(),
-  '/api/temps':         () => hw.getTemps(),
-  '/api/network':       () => hw.getNetwork(),
-  '/api/disks':         () => hw.getDisks(),
-  '/api/uptime':        () => ({ uptime: hw.getUptime() }),
-  '/api/containers':    () => hw.getContainers(),
-  '/api/hostname':      () => ({ hostname: os.hostname() }),
-  '/api/storage':       () => storage.getStoragePools(),
-  '/api/storage/disks': () => ({ disks: storage.detectStorageDisks() }),
-  '/api/storage/health':() => storage.checkStorageHealth(),
-  '/api/firewall':      () => network.getFirewallScan(),
+  '/api/system':          () => hw.getSystemSummary(),
+  '/api/cpu':             () => hw.getCpuUsage(),
+  '/api/memory':          () => hw.getMemory(),
+  '/api/gpu':             () => hw.getGpu(),
+  '/api/temps':           () => hw.getTemps(),
+  '/api/network':         () => hw.getNetwork(),
+  '/api/disks':           () => hw.getDisks(),
+  '/api/uptime':          () => ({ uptime: hw.getUptime() }),
+  '/api/containers':      () => hw.getContainers(),
+  '/api/hostname':        () => ({ hostname: os.hostname() }),
+  '/api/storage':         () => storage.getStoragePools(),
+  '/api/storage/disks':   () => ({ disks: storage.detectStorageDisks() }),
+  '/api/storage/health':  () => storage.checkStorageHealth(),
+  '/api/storage/status':  () => storage.getStoragePools(),
+  '/api/storage/shares':  () => ({ shares: shares.getShares() }),
+  '/api/hardware/gpu-info': () => hw.getHardwareGpuInfo(),
+  '/api/firewall':        () => network.getFirewallScan(),
 };
 
 // ═══════════════════════════════════
