@@ -19,6 +19,16 @@
   --accent-cyan: #26C6DA;
   --accent-pink: #EC407A;
 
+  /* ─── Semantic: alerts & dialogs ─── */
+  --color-danger: #EF5350;
+  --color-danger-bg: rgba(239, 68, 68, 0.12);
+  --color-warning: #FFA726;
+  --color-warning-bg: rgba(255, 167, 38, 0.12);
+  --color-success: #4CAF50;
+  --color-success-bg: rgba(76, 175, 80, 0.12);
+  --color-info: #42A5F5;
+  --color-info-bg: rgba(66, 165, 245, 0.12);
+
   /* ─── Spacing scale (4px base) ─── */
   --space-1: 4px;
   --space-2: 8px;
