@@ -182,7 +182,7 @@ setup_user() {
 
   # Create directories
   mkdir -p "$INSTALL_DIR"
-  mkdir -p "$DATA_DIR"/{apps,shares,backups,thumbnails}
+  mkdir -p "$DATA_DIR"/{apps,shares,backups,thumbnails,config,userdata,volumes}
   mkdir -p "$CONFIG_DIR"
   mkdir -p "$LOG_DIR"
 
@@ -228,6 +228,18 @@ install_nimbusos() {
   chown -R $NIMBUS_USER:$NIMBUS_USER "$DATA_DIR"
   chown -R $NIMBUS_USER:$NIMBUS_USER "$CONFIG_DIR"
   chown -R $NIMBUS_USER:$NIMBUS_USER "$LOG_DIR"
+
+  # Migrate from old homedir-based config (Beta 1 → Beta 2)
+  for OLD_DIR in /root/.nimbusos /home/*/.nimbusos; do
+    if [ -d "$OLD_DIR/config" ] && [ ! -f "$DATA_DIR/config/users.json" ]; then
+      log "Migrating config from $OLD_DIR to $DATA_DIR..."
+      cp -n "$OLD_DIR/config/"*.json "$DATA_DIR/config/" 2>/dev/null || true
+      [ -d "$OLD_DIR/userdata" ] && cp -rn "$OLD_DIR/userdata/"* "$DATA_DIR/userdata/" 2>/dev/null || true
+      [ -d "$OLD_DIR/volumes" ] && cp -rn "$OLD_DIR/volumes/"* "$DATA_DIR/volumes/" 2>/dev/null || true
+      chown -R $NIMBUS_USER:$NIMBUS_USER "$DATA_DIR"
+      ok "Migrated data from $OLD_DIR"
+    fi
+  done
 
   ok "NimbusOS installed to $INSTALL_DIR"
 }
