@@ -37,41 +37,6 @@ const DEFAULT_PREFERENCES = {
 };
 
 // ═══════════════════════════════════
-// Config directory setup
-// ═══════════════════════════════════
-function ensureConfig() {
-  if (!fs.existsSync(CONFIG_DIR)) {
-    fs.mkdirSync(CONFIG_DIR, { recursive: true });
-  }
-  if (!fs.existsSync(USER_DATA_DIR)) {
-    fs.mkdirSync(USER_DATA_DIR, { recursive: true });
-  }
-  if (!fs.existsSync(USERS_FILE)) {
-    fs.writeFileSync(USERS_FILE, '[]');
-  }
-  if (!fs.existsSync(SHARES_FILE)) {
-    fs.writeFileSync(SHARES_FILE, '[]');
-  }
-  if (!fs.existsSync(DOCKER_FILE)) {
-    fs.writeFileSync(DOCKER_FILE, JSON.stringify({
-      installed: false,
-      path: null,
-      permissions: [],        // Permisos globales Docker (admin de contenedores)
-      appPermissions: {},     // Permisos por app: { "plex": ["user1"], "immich": ["user1", "user2"] }
-      installedAt: null,
-      containers: []
-    }, null, 2));
-  }
-  
-  // Installed apps registry
-  const APPS_FILE = path.join(CONFIG_DIR, 'installed-apps.json');
-  if (!fs.existsSync(APPS_FILE)) {
-    fs.writeFileSync(APPS_FILE, '[]');
-  }
-}
-ensureConfig();
-
-// ═══════════════════════════════════
 // User Preferences Management
 // ═══════════════════════════════════
 function getUserDataPath(username) {

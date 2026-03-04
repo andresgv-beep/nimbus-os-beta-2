@@ -922,5 +922,5 @@ module.exports = {
   getStorageConfig, saveStorageConfig, hasPool, detectStorageDisks,
   getRAIDStatus, getStoragePools, createPool, wipeDisk, destroyPool,
   backupConfigToPool, detectExistingPools, checkStorageHealth,
-  NIMBUS_POOLS_DIR: typeof NIMBUS_POOLS_DIR !== 'undefined' ? NIMBUS_POOLS_DIR : path.join(NIMBUS_ROOT, 'pools'),
+  NIMBUS_POOLS_DIR,
 };

@@ -4,7 +4,7 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
-const { run, readFile, formatBytes } = require('./shared.cjs');
+const { run, readFile, formatBytes, sanitizeDockerName } = require('./shared.cjs');
 
 // Detect available tools once at startup
 const HAS_SMARTCTL = !!run('which smartctl 2>/dev/null');

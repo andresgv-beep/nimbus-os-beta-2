@@ -4,7 +4,7 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const { CONFIG_DIR, NATIVE_APPS_FILE, run } = require('./shared.cjs');
+const { CONFIG_DIR, NATIVE_APPS_FILE, run, getSessionUser } = require('./shared.cjs');
 
 // ═══════════════════════════════════
 // Installed Apps Registry

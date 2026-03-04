@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { NIMBUS_ROOT, CONFIG_DIR, SHARES_FILE, getSessionUser, SESSIONS, hashToken, run, formatBytes } = require('./shared.cjs');
+const { getShares } = require('./shares.cjs');
 
 // ═══════════════════════════════════
 // File browsing API (for File Manager)

@@ -2073,11 +2073,6 @@ module.exports = {
   handleSmb, handleSsh, handleDdns, handlePortal, handleProxy, handleFtp, handleNfs, handleDns,
   handleCerts, handleRemoteAccess, handleWebdav,
   getFirewallRules, getListeningPorts, getFirewallScan,
-  upnpDiscover, getLocalIP,
-  // UPnP functions used by router
-  getUpnpGateway: typeof getUpnpGateway !== 'undefined' ? getUpnpGateway : null,
-  upnpListMappings: typeof upnpListMappings !== 'undefined' ? upnpListMappings : null,
-  upnpGetExternalIP: typeof upnpGetExternalIP !== 'undefined' ? upnpGetExternalIP : null,
-  upnpAddMapping: typeof upnpAddMapping !== 'undefined' ? upnpAddMapping : null,
-  upnpRemoveMapping: typeof upnpRemoveMapping !== 'undefined' ? upnpRemoveMapping : null,
+  upnpDiscover, getLocalIP, getUpnpGateway,
+  upnpListMappings, upnpGetExternalIP, upnpAddMapping, upnpRemoveMapping,
 };

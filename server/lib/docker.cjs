@@ -1380,7 +1380,7 @@ tts:
 }
 
 
-module.exports = { handleDocker, getDockerConfig, saveDockerConfig, getContainers: null, containerAction, isDockerInstalled };
+module.exports = { handleDocker, getDockerConfig, saveDockerConfig, isDockerInstalled };
 
 // Re-export getContainers and containerAction from the functions defined above
 // (they're defined inline in the section)
