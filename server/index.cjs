@@ -11,6 +11,15 @@ const path = require('path');
 const { execSync, spawn } = require('child_process');
 const { URL } = require('url');
 
+// ── Safety net: don't crash on unhandled errors ──
+process.on('uncaughtException', (err) => {
+  console.error('[NimbusOS] Uncaught exception:', err.message);
+  console.error(err.stack);
+});
+process.on('unhandledRejection', (err) => {
+  console.error('[NimbusOS] Unhandled rejection:', err);
+});
+
 // ── Load modules ──
 const shared = require('./lib/shared.cjs');
 const auth = require('./lib/auth.cjs');
@@ -61,13 +70,16 @@ function withBody(req, res, handler) {
       const result = await handler(parsed);
       sendResult(res, result);
     } catch (err) {
-      res.writeHead(500, CORS_HEADERS);
-      res.end(JSON.stringify({ error: err.message }));
+      if (!res.headersSent) {
+        res.writeHead(500, CORS_HEADERS);
+        res.end(JSON.stringify({ error: err.message }));
+      }
     }
   });
 }
 
 function sendResult(res, result) {
+  if (res.headersSent) return;
   if (result === null) { res.writeHead(404, CORS_HEADERS); return res.end(JSON.stringify({ error: 'Not found' })); }
   if (result.__binary) { res.writeHead(200, { ...CORS_HEADERS, 'Content-Type': result.mime }); return res.end(fs.readFileSync(result.path)); }
   const code = result.error ? (result.error === 'Unauthorized' ? 401 : result.code === 'NO_PERMISSION' ? 403 : 400) : 200;
@@ -247,7 +259,7 @@ const server = http.createServer((req, res) => {
     const name = sanitizeDockerName(containerMatch[1]);
     if (!name) { res.writeHead(400, CORS_HEADERS); return res.end(JSON.stringify({ error: 'Invalid container name' })); }
     try { res.writeHead(200, CORS_HEADERS); res.end(JSON.stringify(hw.containerAction(name, containerMatch[2]))); }
-    catch (err) { res.writeHead(500, CORS_HEADERS); res.end(JSON.stringify({ error: err.message })); }
+    catch (err) { if (!res.headersSent) { res.writeHead(500, CORS_HEADERS); res.end(JSON.stringify({ error: err.message })); } }
     return;
   }
 
@@ -361,8 +373,16 @@ const server = http.createServer((req, res) => {
       const dc = docker.getDockerConfig();
       if (session.role !== 'admin' && !dc.permissions.includes(session.username)) { res.writeHead(403, CORS_HEADERS); return res.end(JSON.stringify({ error: 'No permission' })); }
     }
-    try { res.writeHead(200, CORS_HEADERS); res.end(JSON.stringify(handler())); }
-    catch (err) { res.writeHead(500, CORS_HEADERS); res.end(JSON.stringify({ error: err.message })); }
+    try {
+      const data = handler();
+      res.writeHead(200, CORS_HEADERS);
+      res.end(JSON.stringify(data));
+    } catch (err) {
+      if (!res.headersSent) {
+        res.writeHead(500, CORS_HEADERS);
+        res.end(JSON.stringify({ error: err.message }));
+      }
+    }
     return;
   }
 
