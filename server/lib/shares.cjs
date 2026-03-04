@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const { NIMBUS_ROOT, SHARES_FILE, getSessionUser, run } = require('./shared.cjs');
+const { getStorageConfig } = require('./storage.cjs');
 
 // ═══════════════════════════════════
 // Shared Folders API

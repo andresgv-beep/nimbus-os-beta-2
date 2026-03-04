@@ -536,6 +536,17 @@ function createPool(name, disks, level, filesystem = 'ext4') {
       execSync(`mkdir -p ${mountPoint}/${dir}`);
     }
     
+    // 3b. Write pool identity file (survives reinstalls)
+    const poolIdentity = {
+      name,
+      raidLevel: isSingleDisk ? 'single' : `raid${levelInt}`,
+      filesystem,
+      disks,
+      createdAt: new Date().toISOString(),
+      nimbusVersion: '2.0.0-beta',
+    };
+    fs.writeFileSync(path.join(mountPoint, '.nimbus-pool.json'), JSON.stringify(poolIdentity, null, 2));
+    
     // 4. Save pool config
     const isFirstPool = !config.pools || config.pools.length === 0;
     if (!config.pools) config.pools = [];
@@ -878,12 +889,236 @@ function checkStorageHealth() {
 setInterval(checkStorageHealth, 60000); // Every 60s
 setInterval(() => { if (hasPool()) backupConfigToPool(); }, 6 * 60 * 60 * 1000); // Every 6h
 
+// ═══════════════════════════════════
+// Pool Restore — detect and recover pools from previous installs
+// ═══════════════════════════════════
+
+// Scan all partitions for .nimbus-pool.json identity files
+function scanForRestorablePools() {
+  const found = [];
+  const config = getStorageConfig();
+  const existingMounts = (config.pools || []).map(p => p.mountPoint);
+
+  // Get all partitions with ext4/xfs that could be nimbus pools
+  const blkid = run('blkid 2>/dev/null') || '';
+  const candidates = [];
+  for (const line of blkid.split('\n')) {
+    if (!line) continue;
+    const devMatch = line.match(/^(\/dev\/\S+):/);
+    if (!devMatch) continue;
+    const dev = devMatch[1];
+    // Skip boot partitions, swap, small partitions
+    if (dev.includes('nvme0n1p') && !line.includes('nimbus')) continue;
+    if (line.includes('TYPE="swap"') || line.includes('TYPE="vfat"')) continue;
+    // Only ext4 and xfs
+    if (line.includes('TYPE="ext4"') || line.includes('TYPE="xfs"')) {
+      const labelMatch = line.match(/LABEL="([^"]+)"/);
+      candidates.push({ dev, label: labelMatch ? labelMatch[1] : null });
+    }
+  }
+
+  for (const cand of candidates) {
+    const tmpMount = `/tmp/nimbus-scan-${cand.dev.replace(/\//g, '_')}`;
+    try {
+      // Check if already mounted somewhere
+      const existingMount = run(`findmnt -n -o TARGET ${cand.dev} 2>/dev/null`)?.trim();
+      let mountDir = existingMount;
+      let didMount = false;
+
+      if (!mountDir) {
+        execSync(`mkdir -p ${tmpMount}`, { timeout: 5000 });
+        execSync(`mount -o ro ${cand.dev} ${tmpMount} 2>/dev/null`, { timeout: 10000 });
+        mountDir = tmpMount;
+        didMount = true;
+      }
+
+      const identityFile = path.join(mountDir, '.nimbus-pool.json');
+      if (fs.existsSync(identityFile)) {
+        const identity = JSON.parse(fs.readFileSync(identityFile, 'utf8'));
+
+        // Check it's not already configured
+        const alreadyConfigured = (config.pools || []).some(p => p.name === identity.name);
+
+        // Check what data exists
+        const hasDocker = fs.existsSync(path.join(mountDir, 'docker'));
+        const hasShares = fs.existsSync(path.join(mountDir, 'shares'));
+        const hasBackup = fs.existsSync(path.join(mountDir, 'system-backup', 'config'));
+
+        // Get size info
+        const sizeInfo = run(`df -B1 ${mountDir} 2>/dev/null | tail -1`)?.trim() || '';
+        const sizeParts = sizeInfo.split(/\s+/);
+        const totalBytes = parseInt(sizeParts[1]) || 0;
+        const usedBytes = parseInt(sizeParts[2]) || 0;
+
+        found.push({
+          device: cand.dev,
+          label: cand.label,
+          pool: identity,
+          alreadyConfigured,
+          currentMount: existingMount || null,
+          data: { hasDocker, hasShares, hasBackup },
+          size: { total: totalBytes, totalFormatted: formatBytes(totalBytes), used: usedBytes, usedFormatted: formatBytes(usedBytes) },
+        });
+      }
+
+      if (didMount) {
+        execSync(`umount ${tmpMount} 2>/dev/null || true`, { timeout: 5000 });
+        execSync(`rmdir ${tmpMount} 2>/dev/null || true`);
+      }
+    } catch (err) {
+      // Cleanup on error
+      execSync(`umount ${tmpMount} 2>/dev/null || true`);
+      execSync(`rmdir ${tmpMount} 2>/dev/null || true`);
+    }
+  }
+
+  // Also check for nimbus-labeled partitions without identity file (beta 1 pools)
+  for (const cand of candidates) {
+    if (cand.label && cand.label.startsWith('nimbus-') && !found.some(f => f.device === cand.dev)) {
+      const poolName = cand.label.replace('nimbus-', '');
+      const alreadyConfigured = (config.pools || []).some(p => p.name === poolName);
+      found.push({
+        device: cand.dev,
+        label: cand.label,
+        pool: { name: poolName, raidLevel: 'unknown', filesystem: 'ext4', createdAt: null, legacy: true },
+        alreadyConfigured,
+        currentMount: run(`findmnt -n -o TARGET ${cand.dev} 2>/dev/null`)?.trim() || null,
+        data: { hasDocker: false, hasShares: false, hasBackup: false },
+        size: { total: 0, totalFormatted: '—', used: 0, usedFormatted: '—' },
+      });
+    }
+  }
+
+  return found;
+}
+
+// Restore a pool: mount it and register in config
+function restorePool(device, poolName) {
+  if (!device) return { error: 'Device path required' };
+
+  // Verify the device exists
+  if (!fs.existsSync(device)) return { error: `Device ${device} not found` };
+
+  const config = getStorageConfig();
+  if ((config.pools || []).some(p => p.name === poolName)) {
+    return { error: `Pool "${poolName}" already configured` };
+  }
+
+  const mountPoint = `${NIMBUS_POOLS_DIR}/${poolName}`;
+
+  try {
+    // 1. Mount the pool
+    execSync(`mkdir -p ${mountPoint}`, { timeout: 5000 });
+
+    // Check if already mounted
+    const existing = run(`findmnt -n -o TARGET ${device} 2>/dev/null`)?.trim();
+    if (existing && existing !== mountPoint) {
+      execSync(`umount ${device} 2>/dev/null || true`, { timeout: 10000 });
+    }
+    if (!existing || existing !== mountPoint) {
+      execSync(`mount ${device} ${mountPoint}`, { timeout: 10000 });
+    }
+
+    // 2. Read identity file if it exists
+    let identity = {};
+    const identityFile = path.join(mountPoint, '.nimbus-pool.json');
+    if (fs.existsSync(identityFile)) {
+      identity = JSON.parse(fs.readFileSync(identityFile, 'utf8'));
+    }
+
+    // 3. Detect filesystem
+    const fstype = run(`blkid -s TYPE -o value ${device} 2>/dev/null`)?.trim() || 'ext4';
+
+    // 4. Add to fstab
+    const uuid = run(`blkid -s UUID -o value ${device} 2>/dev/null`)?.trim();
+    if (uuid) {
+      // Remove old fstab entries for this device/uuid
+      execSync(`sed -i '/${uuid}/d' /etc/fstab 2>/dev/null || true`);
+      execSync(`echo "UUID=${uuid} ${mountPoint} ${fstype} defaults,noatime 0 2" >> /etc/fstab`);
+    }
+
+    // 5. Figure out parent disk
+    const parentDisk = run(`lsblk -no PKNAME ${device} 2>/dev/null`)?.trim();
+    const diskPath = parentDisk ? `/dev/${parentDisk}` : device;
+
+    // 6. Register pool in config
+    if (!config.pools) config.pools = [];
+    const poolEntry = {
+      name: poolName,
+      arrayName: null,
+      mountPoint,
+      raidLevel: identity.raidLevel || 'single',
+      filesystem: fstype,
+      disks: identity.disks || [diskPath],
+      createdAt: identity.createdAt || new Date().toISOString(),
+      restoredAt: new Date().toISOString(),
+      imported: true,
+    };
+    config.pools.push(poolEntry);
+
+    if (!config.primaryPool) {
+      config.primaryPool = poolName;
+      config.configuredAt = new Date().toISOString();
+    }
+    saveStorageConfig(config);
+
+    // 7. If there's a config backup in the pool, offer to restore it
+    let restoredConfig = false;
+    const backupDir = path.join(mountPoint, 'system-backup', 'config');
+    if (fs.existsSync(backupDir)) {
+      // Restore shares and docker config (not users — current install has its own)
+      const restorableFiles = ['shares.json', 'docker.json', 'installed-apps.json'];
+      for (const file of restorableFiles) {
+        const backupFile = path.join(backupDir, file);
+        const targetFile = path.join(CONFIG_DIR, file);
+        if (fs.existsSync(backupFile) && !fs.existsSync(targetFile)) {
+          fs.copyFileSync(backupFile, targetFile);
+        }
+      }
+      restoredConfig = true;
+    }
+
+    // 8. Write/update identity file if missing
+    if (!fs.existsSync(identityFile)) {
+      fs.writeFileSync(identityFile, JSON.stringify({
+        name: poolName,
+        raidLevel: poolEntry.raidLevel,
+        filesystem: fstype,
+        disks: poolEntry.disks,
+        createdAt: poolEntry.createdAt,
+        nimbusVersion: '2.0.0-beta',
+      }, null, 2));
+    }
+
+    // 9. Clear disk cache
+    diskCache = null;
+
+    console.log(`[Storage] Pool "${poolName}" restored from ${device} at ${mountPoint}`);
+    return {
+      ok: true,
+      pool: poolEntry,
+      restoredConfig,
+      data: {
+        hasDocker: fs.existsSync(path.join(mountPoint, 'docker')),
+        hasShares: fs.existsSync(path.join(mountPoint, 'shares')),
+        hasBackup: fs.existsSync(backupDir),
+      },
+    };
+
+  } catch (err) {
+    console.error(`[Storage] Restore pool failed:`, err.message);
+    // Cleanup on failure
+    execSync(`umount ${mountPoint} 2>/dev/null || true`);
+    return { error: 'Restore failed: ' + err.message };
+  }
+}
 
 
 module.exports = {
   getStorageConfig, saveStorageConfig, hasPool, detectStorageDisks,
   getRAIDStatus, getStoragePools, createPool, wipeDisk, destroyPool,
   backupConfigToPool, detectExistingPools, checkStorageHealth,
+  scanForRestorablePools, restorePool,
   get storageAlerts() { return storageAlerts; },
   NIMBUS_POOLS_DIR,
 };
