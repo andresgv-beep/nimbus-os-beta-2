@@ -430,8 +430,6 @@ function CreatePoolPage({disks, token, onCreated}) {
           <select value={filesystem} onChange={e=>setFilesystem(e.target.value)} className={styles.formInput}>
             <option value="ext4">ext4 (Recommended)</option><option value="xfs">XFS (Large files)</option>
           </select>
-            <option value="ext4">ext4 (Recommended)</option><option value="xfs">XFS (Large files)</option>
-          </select>
           <button className={styles.btnPrimary} onClick={handleCreateClick} disabled={creating||!poolName.trim()}>
             {creating?'Creating...':'Create Pool'}
           </button>
