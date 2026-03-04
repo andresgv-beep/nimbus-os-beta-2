@@ -8,7 +8,7 @@ const crypto = require('crypto');
 const path = require('path');
 
 const PORT = parseInt(process.env.NIMBUS_PORT || '5000');
-const NIMBUS_ROOT = path.join(os.homedir(), '.nimbusos');
+const NIMBUS_ROOT = process.env.NIMBUS_ROOT || '/var/lib/nimbusos';
 const CONFIG_DIR = path.join(NIMBUS_ROOT, 'config');
 const USER_DATA_DIR = path.join(NIMBUS_ROOT, 'userdata');
 const USERS_FILE = path.join(CONFIG_DIR, 'users.json');
