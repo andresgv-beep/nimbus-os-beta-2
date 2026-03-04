@@ -193,7 +193,7 @@ install_nimbusos() {
   step "Installing NimbusOS application"
 
   # Download via tarball (no git auth needed)
-  TARBALL_URL="https://github.com/andresgv-beep/nimbus-os-beta-1/archive/refs/heads/${NIMBUS_BRANCH}.tar.gz"
+  TARBALL_URL="https://github.com/andresgv-beep/nimbus-os-beta-2/archive/refs/heads/${NIMBUS_BRANCH}.tar.gz"
   
   if [[ -d "$INSTALL_DIR/server" ]]; then
     log "Updating existing installation..."
