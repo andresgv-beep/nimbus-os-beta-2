@@ -70,6 +70,7 @@ const routes = {
   '/api/storage/alerts':    () => ({ alerts: storage.storageAlerts }),
   '/api/storage/health':    () => storage.checkStorageHealth(),
   '/api/storage/detect-existing': () => ({ pools: storage.detectExistingPools() }),
+  '/api/storage/restorable':      () => ({ pools: storage.scanForRestorablePools() }),
   '/api/firewall':          () => network.getFirewallScan(),
   '/api/firewall/rules':    () => network.getFirewallRules(),
   '/api/firewall/ports':    () => network.getListeningPorts(),
@@ -314,6 +315,7 @@ const server = http.createServer((req, res) => {
       if (url === '/api/storage/backup') { storage.backupConfigToPool(); return { ok: true }; }
       if (url === '/api/storage/wipe') return parsed.disk ? storage.wipeDisk(parsed.disk) : { error: 'Provide disk path' };
       if (url === '/api/storage/pool/destroy') return parsed.name ? storage.destroyPool(parsed.name) : { error: 'Provide pool name' };
+      if (url === '/api/storage/pool/restore') return (parsed.device && parsed.name) ? storage.restorePool(parsed.device, parsed.name) : { error: 'Provide device and name' };
       if (url === '/api/storage/reimport') {
         if (!parsed.pools || !Array.isArray(parsed.pools)) return { error: 'Provide pools array' };
         const config = storage.getStorageConfig();
