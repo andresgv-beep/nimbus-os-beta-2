@@ -252,7 +252,7 @@ export default function DownloadStation() {
   // Load shares for download dir picker
   const loadShares = useCallback(async () => {
     try {
-      const r = await fetch('/api/storage/shares', { headers });
+      const r = await fetch('/api/shares', { headers });
       const d = await r.json();
       if (d.shares) setShares(d.shares);
     } catch {}
