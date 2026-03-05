@@ -4,6 +4,9 @@ import { ChevronLeftIcon, SearchIcon } from '@icons';
 import * as Hub from '@icons/hub/index.jsx';
 import styles from './SettingsHub.module.css';
 
+// ─── Settings page imports ───
+import { AppearancePage, DesktopPage, WidgetsPage, HardwarePage, LanguagePage, NotificationsPage, AboutPage } from '../settings/Settings.jsx';
+
 // ═══════════════════════════════════
 // Navigation categories
 // ═══════════════════════════════════
@@ -38,7 +41,6 @@ function NavIcon({ type, size = 18 }) {
 const GRID = {
   system: [
     { id: 'storage-mgr', label: 'Storage', icon: Hub.HubStorageIcon, title: 'System Management' },
-    { id: 'containers', label: 'Containers', icon: Hub.HubContainersIcon },
     { id: 'network-mgr', label: 'Network', icon: Hub.HubNetworkIcon },
     { id: 'users', label: 'Users', icon: Hub.HubUsersIcon },
     { id: 'portal', label: 'Portal', icon: Hub.HubPortalIcon },
@@ -89,7 +91,6 @@ const GRID = {
 
 const SECTION_SIDEBAR = {
   'storage-mgr':   { label: 'Storage Manager', items: ['Overview', 'Disks', 'Pools & RAID', 'Shared Folders', 'Health'] },
-  'containers':    { label: 'Containers', items: ['Running', 'All Containers', 'Images', 'Stacks', 'Settings'] },
   'network-mgr':   { label: 'Network', grouped: true, items: [
     { label: 'Interfaces', section: 'Network' },
     { label: 'Remote Access', section: 'External Access' },
@@ -122,13 +123,29 @@ const SECTION_SIDEBAR = {
   'sessions':      { label: 'Sessions', items: ['Active Sessions', 'History'] },
   'backup':        { label: 'Backup', items: ['Create Backup', 'Restore', 'Schedule'] },
   'logs':          { label: 'Logs', items: ['System Log', 'Access Log', 'Update Log'] },
-  'theme':         { label: 'Theme', items: ['Color Theme', 'Accent Color'] },
-  'wallpaper':     { label: 'Wallpaper', items: ['Upload', 'Gallery'] },
+  'theme':         { label: 'Appearance', items: ['Theme & Colors', 'Performance', 'Window Glow'] },
+  'wallpaper':     { label: 'Desktop', items: ['Wallpaper', 'Icons', 'Dock', 'Text Size'] },
   'taskbar':       { label: 'Taskbar', items: ['Position', 'Size', 'Auto-hide', 'Pinned Apps'] },
   'widgets':       { label: 'Widgets', items: ['Visible Widgets', 'Scale'] },
-  'sysinfo':       { label: 'System Info', items: ['Hardware', 'Software', 'Network'] },
+  'sysinfo':       { label: 'About', items: ['System Info', 'Hardware', 'Language'] },
   'license':       { label: 'License', items: ['NimbusOS License'] },
 };
+
+// ═══════════════════════════════════
+// Component Registry
+// Maps section IDs → React components
+// Sections not listed here render the placeholder
+// ═══════════════════════════════════
+
+const SECTION_COMPONENTS = {
+  'theme':     AppearancePage,
+  'wallpaper': DesktopPage,
+  'widgets':   WidgetsPage,
+  'sysinfo':   AboutPage,
+};
+
+// Standalone page (no sidebar sub-items, render directly)
+const STANDALONE_SECTIONS = new Set(['theme', 'wallpaper', 'widgets', 'sysinfo']);
 
 // ═══════════════════════════════════
 // Component
@@ -286,13 +303,20 @@ export default function SettingsHub() {
               className={`${styles.contentInner} ${perf === 'performance' ? styles.contentRevealed : ''}`}
               ref={contentRef}
             >
-              {/* TODO: Render actual components here */}
-              <div className={styles.placeholder}>
-                {sectionDef.label} › {sidebarItem || '...'}<br />
-                <span style={{ fontSize: 11, marginTop: 8, display: 'block', opacity: 0.5 }}>
-                  Component will be ported here
-                </span>
-              </div>
+              {(() => {
+                const SectionComp = SECTION_COMPONENTS[section];
+                if (SectionComp) {
+                  return <SectionComp />;
+                }
+                return (
+                  <div className={styles.placeholder}>
+                    {sectionDef.label} › {sidebarItem || '...'}<br />
+                    <span style={{ fontSize: 11, marginTop: 8, display: 'block', opacity: 0.5 }}>
+                      Component will be ported here
+                    </span>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         ) : (
