@@ -110,6 +110,7 @@ export default function SettingsHub() {
   const [search, setSearch] = useState('');
   const [exiting, setExiting] = useState(false);
   const [glassFlash, setGlassFlash] = useState(false);
+  const [sidebarRevealed, setSidebarRevealed] = useState(false);
   const sidebarRef = useRef(null);
   const contentRef = useRef(null);
 
@@ -124,11 +125,13 @@ export default function SettingsHub() {
       const def = SECTION_SIDEBAR[id];
       const first = def?.section ? def.items[0]?.label : (def?.items?.[0] || null);
       setSidebarItem(first);
+      setSidebarRevealed(true);
       return;
     }
 
     // Animate exit
     setExiting(true);
+    setSidebarRevealed(false);
     if (perf === 'full') { setGlassFlash(true); setTimeout(() => setGlassFlash(false), 300); }
 
     setTimeout(() => {
@@ -141,10 +144,13 @@ export default function SettingsHub() {
       // Stagger sidebar reveal
       requestAnimationFrame(() => {
         if (sidebarRef.current) {
-          sidebarRef.current.querySelectorAll('[data-sidebar-item]').forEach((el, i) => {
+          const items = sidebarRef.current.querySelectorAll('[data-sidebar-item]');
+          items.forEach((el, i) => {
             const d = perf === 'full' ? i * 40 : i * 15;
             setTimeout(() => el.classList.add(styles.revealed), d);
           });
+          // After all are revealed, set state so re-renders keep them visible
+          setTimeout(() => setSidebarRevealed(true), (items.length * (perf === 'full' ? 40 : 15)) + 50);
         }
         if (contentRef.current) {
           requestAnimationFrame(() => contentRef.current?.classList.add(styles.revealed));
@@ -155,6 +161,7 @@ export default function SettingsHub() {
 
   const goBack = useCallback(() => {
     if (contentRef.current) contentRef.current.classList.remove(styles.revealed);
+    setSidebarRevealed(false);
     
     setTimeout(() => {
       setSection(null);
@@ -205,7 +212,7 @@ export default function SettingsHub() {
                   {sectionLabel && <div className={styles.sidebarSection}>{sectionLabel}</div>}
                   <div
                     data-sidebar-item
-                    className={`${styles.sidebarItem} ${sidebarItem === label ? styles.sidebarItemActive : ''} ${perf === 'performance' ? styles.revealed : ''}`}
+                    className={`${styles.sidebarItem} ${sidebarItem === label ? styles.sidebarItemActive : ''} ${(perf === 'performance' || sidebarRevealed) ? styles.revealed : ''}`}
                     onClick={() => selectSidebarItem(label)}
                   >
                     {label}
@@ -240,7 +247,7 @@ export default function SettingsHub() {
       {/* Glass overlay for transitions */}
       <div className={`${styles.glassOverlay} ${glassFlash ? styles.glassFlash : ''}`} />
 
-      {/* Tabs */}
+      {/* Tabs + Search */}
       <div className={styles.tabsBar}>
         {TABS.map(t => (
           <div
@@ -251,22 +258,19 @@ export default function SettingsHub() {
             {t.label}
           </div>
         ))}
+        <div className={styles.searchBarInline}>
+          <SearchIcon size={13} />
+          <input
+            className={styles.searchInput}
+            placeholder="Search settings..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
       </div>
 
-      {/* Search + Grid */}
+      {/* Grid */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
-        <div className={styles.searchWrap}>
-          <div className={styles.searchBar}>
-            <SearchIcon size={14} />
-            <input
-              className={styles.searchInput}
-              placeholder="Search settings..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
-        </div>
-
         <div className={styles.gridWrap}>
           <div className={`${styles.grid} ${exiting ? styles.gridExiting : ''}`}>
             {gridItems.map(item => {
