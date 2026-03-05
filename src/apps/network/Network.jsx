@@ -997,6 +997,19 @@ function Fail2banPage() {
 }
 
 /* ─── Main Network Component ─── */
+// Named exports for SettingsHub integration
+export { InterfacesPage, DDNSPage, PortsPage, FirewallPage, Fail2banPage };
+// Re-export external panels
+export { default as SmbPanel } from './SmbPanel';
+export { default as FtpPanel } from './FtpPanel';
+export { default as SshPanel } from './SshPanel';
+export { default as NfsPanel } from './NfsPanel';
+export { default as WebDavPanel } from './WebDavPanel';
+export { default as DnsPanel } from './DnsPanel';
+export { default as CertsPanel } from './CertsPanel';
+export { default as ProxyPanel } from './ProxyPanel';
+export { default as RemoteAccessPanel } from './RemoteAccessPanel';
+
 export default function Network() {
   const { token } = useAuth();
   const [active, setActive] = useState('remote');
