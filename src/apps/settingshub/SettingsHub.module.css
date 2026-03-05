@@ -3,7 +3,7 @@
 
 /* ─── Tabs bar (home view) ─── */
 .tabsBar {
-  display: flex; gap: 0; padding: 0 16px;
+  display: flex; align-items: center; gap: 0; padding: 0 16px;
   border-bottom: 1px solid var(--border);
   background: var(--bg-sidebar);
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
@@ -37,25 +37,23 @@
 .backCrumb { font-size: var(--text-sm); color: var(--text-muted); font-weight: 500; }
 .backSection { font-size: var(--text-sm); color: var(--text-primary); font-weight: 500; }
 
-/* ─── Search ─── */
-.searchWrap {
-  padding: 16px 24px 0;
-}
-
-.searchBar {
-  display: flex; align-items: center; gap: 8px;
-  padding: 7px 14px;
+/* ─── Inline search (inside tabs bar) ─── */
+.searchBarInline {
+  display: flex; align-items: center; gap: 6px;
+  margin-left: auto;
+  padding: 5px 12px;
   background: var(--bg-hover);
   border: 1px solid var(--border);
-  border-radius: var(--radius); width: 260px;
+  border-radius: var(--radius);
+  width: 200px;
 }
 
-.searchBar svg { opacity: 0.3; flex-shrink: 0; }
+.searchBarInline svg { opacity: 0.3; flex-shrink: 0; }
 
 .searchInput {
   background: none; border: none; outline: none;
   color: var(--text-primary); font-family: inherit;
-  font-size: var(--text-sm); width: 100%;
+  font-size: 12px; width: 100%;
 }
 
 .searchInput::placeholder { color: var(--text-muted); }
