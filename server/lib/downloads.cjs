@@ -13,10 +13,8 @@ const { NIMBUS_ROOT, CONFIG_DIR, getSessionUser, run } = require('./shared.cjs')
 let transmissionSessionId = '';
 
 async function transmissionRPC(method, args = {}) {
-  const http = require('http');
   const settingsPath = '/etc/transmission-daemon/settings.json';
   let rpcPort = 9091;
-  let rpcUser = '';
   let rpcPass = '';
   
   try {

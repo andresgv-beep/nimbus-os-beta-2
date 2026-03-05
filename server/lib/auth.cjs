@@ -864,7 +864,7 @@ function handleAuth(url, method, body, req) {
     const user = users.find(u => u.username === target);
     if (!user) return { error: 'User not found' };
 
-    if (body.password && body.password.length >= 4) {
+    if (body.password) { const pwErr = validatePassword(body.password); if (pwErr) return { error: pwErr };
       user.password = hashPassword(body.password);
       // Sync: update Samba password
       ensureSmbUser(target, body.password);
