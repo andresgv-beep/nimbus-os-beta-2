@@ -19,6 +19,13 @@ import {
   DnsPanel, CertsPanel, ProxyPanel, RemoteAccessPanel,
 } from '../network/Network.jsx';
 
+// ─── Storage imports ───
+import {
+  StorageProvider,
+  StorageOverviewView, StorageDisksView, StoragePoolsView,
+  StorageSmartView, StorageCreateView, StorageRestoreView,
+} from '../storage/StorageManager.jsx';
+
 // ═══════════════════════════════════
 // Navigation categories
 // ═══════════════════════════════════
@@ -102,7 +109,11 @@ const GRID = {
 // ═══════════════════════════════════
 
 const SECTION_SIDEBAR = {
-  'storage-mgr':   { label: 'Storage Manager', items: ['Overview', 'Disks', 'Pools & RAID', 'Shared Folders', 'Health'] },
+  'storage-mgr':   { label: 'Storage Manager', grouped: true, items: [
+    { label: 'Overview', section: 'Storage' },
+    { label: 'Physical Disks' }, { label: 'Pools' }, { label: 'SMART Health' },
+    { label: 'Create Pool', section: 'Actions' }, { label: 'Restore Pool' },
+  ]},
   'network-mgr':   { label: 'Network', grouped: true, items: [
     { label: 'Interfaces', section: 'Network' },
     { label: 'DNS' },
@@ -118,10 +129,10 @@ const SECTION_SIDEBAR = {
   'monitor':       { label: 'System Monitor', items: ['Overview', 'CPU', 'Memory', 'GPU', 'Processes'] },
   'updates':       { label: 'Updates', items: ['Check Updates', 'Update Log'] },
   'power':         { label: 'Power', items: ['Restart Service', 'Reboot System', 'Shutdown'] },
-  'disks':         { label: 'Disks', items: ['All Disks', 'SMART Status', 'Wipe'] },
-  'pools':         { label: 'Pools & RAID', items: ['Active Pools', 'Create Pool', 'Import'] },
+  'disks':         { label: 'Disks', items: ['Physical Disks'] },
+  'pools':         { label: 'Pools & RAID', items: ['Pools'] },
   'shares':        { label: 'Shared Folders', items: ['All Shares', 'Create Share', 'Permissions'] },
-  'health':        { label: 'Health', items: ['RAID Status', 'SMART', 'Alerts'] },
+  'health':        { label: 'Health', items: ['SMART Health'] },
   'interfaces':    { label: 'Interfaces', items: ['Overview'] },
   'remote-access': { label: 'Remote Access', items: ['Configuration'] },
   'ddns':          { label: 'DDNS', items: ['Configuration'] },
@@ -204,7 +215,51 @@ const SECTION_COMPONENTS = {
   'webdav':        { 'Configuration': WebDavPanel },
   'firewall':      { 'Rules':         FirewallPage },
   'certificates':  { 'Management':    CertsPanel },
+
+  // ─── Storage (unified sidebar) ───
+  'storage-mgr': {
+    'Overview':       StorageOverviewView,
+    'Physical Disks': StorageDisksView,
+    'Pools':          StoragePoolsView,
+    'SMART Health':   StorageSmartView,
+    'Create Pool':    StorageCreateView,
+    'Restore Pool':   StorageRestoreView,
+  },
+
+  // ─── Storage (individual grid items) ───
+  'disks':  { 'Physical Disks': StorageDisksView },
+  'pools':  { 'Pools':          StoragePoolsView },
+  'health': { 'SMART Health':   StorageSmartView },
 };
+
+// ═══════════════════════════════════
+// Section Renderer — resolves component from registry, wraps providers as needed
+// Lives outside SettingsHub so provider doesn't re-mount on sidebar item change
+// ═══════════════════════════════════
+
+const PROVIDER_SECTIONS = { 'storage-mgr': StorageProvider, 'disks': StorageProvider, 'pools': StorageProvider, 'health': StorageProvider };
+
+function SectionRendererInner({ section, sidebarItem, sectionDef }) {
+  const sectionMap = SECTION_COMPONENTS[section];
+  const SectionComp = sectionMap?.[sidebarItem];
+  if (SectionComp) return <SectionComp />;
+  return (
+    <div className={styles.placeholder}>
+      {sectionDef.label} › {sidebarItem || '...'}<br />
+      <span style={{ fontSize: 11, marginTop: 8, display: 'block', opacity: 0.5 }}>
+        Component will be ported here
+      </span>
+    </div>
+  );
+}
+
+function SectionRenderer({ section, sidebarItem, sectionDef }) {
+  const Provider = PROVIDER_SECTIONS[section];
+  if (Provider) {
+    return <Provider><SectionRendererInner section={section} sidebarItem={sidebarItem} sectionDef={sectionDef} /></Provider>;
+  }
+  return <SectionRendererInner section={section} sidebarItem={sidebarItem} sectionDef={sectionDef} />;
+}
 
 // ═══════════════════════════════════
 // Component
@@ -362,21 +417,7 @@ export default function SettingsHub() {
               className={`${styles.contentInner} ${perf === 'performance' ? styles.contentRevealed : ''}`}
               ref={contentRef}
             >
-              {(() => {
-                const sectionMap = SECTION_COMPONENTS[section];
-                const SectionComp = sectionMap?.[sidebarItem];
-                if (SectionComp) {
-                  return <SectionComp />;
-                }
-                return (
-                  <div className={styles.placeholder}>
-                    {sectionDef.label} › {sidebarItem || '...'}<br />
-                    <span style={{ fontSize: 11, marginTop: 8, display: 'block', opacity: 0.5 }}>
-                      Component will be ported here
-                    </span>
-                  </div>
-                );
-              })()}
+              <SectionRenderer section={section} sidebarItem={sidebarItem} sectionDef={sectionDef} />
             </div>
           </div>
         ) : (
