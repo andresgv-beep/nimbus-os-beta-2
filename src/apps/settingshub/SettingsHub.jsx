@@ -70,7 +70,6 @@ const GRID = {
   storage: [
     { id: 'disks', label: 'Disks', icon: Hub.HubDisksIcon, title: 'Storage' },
     { id: 'pools', label: 'Pools & RAID', icon: Hub.HubPoolsIcon },
-    { id: 'shares', label: 'Shared Folders', icon: Hub.HubSharedFoldersIcon },
     { id: 'health', label: 'Health', icon: Hub.HubHealthIcon },
   ],
   network: [
@@ -129,9 +128,11 @@ const SECTION_SIDEBAR = {
   'monitor':       { label: 'System Monitor', items: ['Overview', 'CPU', 'Memory', 'GPU', 'Processes'] },
   'updates':       { label: 'Updates', items: ['Check Updates', 'Update Log'] },
   'power':         { label: 'Power', items: ['Restart Service', 'Reboot System', 'Shutdown'] },
-  'disks':         { label: 'Disks', items: ['Physical Disks'] },
-  'pools':         { label: 'Pools & RAID', items: ['Pools'] },
-  'shares':        { label: 'Shared Folders', items: ['All Shares', 'Create Share', 'Permissions'] },
+  'disks':         { label: 'Disks', items: ['Physical Disks', 'SMART Health'] },
+  'pools':         { label: 'Pools & RAID', grouped: true, items: [
+    { label: 'Pools', section: 'Storage' },
+    { label: 'Create Pool', section: 'Actions' }, { label: 'Restore Pool' },
+  ]},
   'health':        { label: 'Health', items: ['SMART Health'] },
   'interfaces':    { label: 'Interfaces', items: ['Overview'] },
   'remote-access': { label: 'Remote Access', items: ['Configuration'] },
@@ -227,9 +228,9 @@ const SECTION_COMPONENTS = {
   },
 
   // ─── Storage (individual grid items) ───
-  'disks':  { 'Physical Disks': StorageDisksView },
-  'pools':  { 'Pools':          StoragePoolsView },
-  'health': { 'SMART Health':   StorageSmartView },
+  'disks':  { 'Physical Disks': StorageDisksView, 'SMART Health': StorageSmartView },
+  'pools':  { 'Pools': StoragePoolsView, 'Create Pool': StorageCreateView, 'Restore Pool': StorageRestoreView },
+  'health': { 'SMART Health': StorageSmartView },
 };
 
 // ═══════════════════════════════════
