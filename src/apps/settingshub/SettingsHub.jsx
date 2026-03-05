@@ -6,13 +6,18 @@ import styles from './SettingsHub.module.css';
 
 // ─── Settings page imports ───
 import {
-  // Sub-components for granular sidebar mapping
   PerformanceSection, ThemeSection, AccentSection, GlowSection,
   IconsSection, DockSection, WallpaperSection, TextSizeSection,
   WidgetGeneralSection, WidgetScaleSection, WidgetActiveSection,
-  // Full pages (for sections not yet split)
   HardwarePage, LanguagePage, NotificationsPage, AboutPage,
 } from '../settings/Settings.jsx';
+
+// ─── Network page imports ───
+import {
+  InterfacesPage, DDNSPage, PortsPage, FirewallPage, Fail2banPage,
+  SmbPanel, FtpPanel, SshPanel, NfsPanel, WebDavPanel,
+  DnsPanel, CertsPanel, ProxyPanel, RemoteAccessPanel,
+} from '../network/Network.jsx';
 
 // ═══════════════════════════════════
 // Navigation categories
@@ -100,11 +105,13 @@ const SECTION_SIDEBAR = {
   'storage-mgr':   { label: 'Storage Manager', items: ['Overview', 'Disks', 'Pools & RAID', 'Shared Folders', 'Health'] },
   'network-mgr':   { label: 'Network', grouped: true, items: [
     { label: 'Interfaces', section: 'Network' },
+    { label: 'DNS' },
     { label: 'Remote Access', section: 'External Access' },
+    { label: 'Port Exposure' },
     { label: 'DDNS' }, { label: 'Reverse Proxy' }, { label: 'Certificates' },
     { label: 'SMB / CIFS', section: 'Services' },
     { label: 'FTP / SFTP' }, { label: 'SSH' }, { label: 'NFS' }, { label: 'WebDAV' },
-    { label: 'Firewall', section: 'Security' },
+    { label: 'Firewall', section: 'Security' }, { label: 'Fail2ban' },
   ]},
   'users':         { label: 'Users', items: ['All Users', 'Create User', 'Permissions'] },
   'portal':        { label: 'Portal', items: ['Web Portal', 'Ports', 'Service Control'] },
@@ -115,17 +122,17 @@ const SECTION_SIDEBAR = {
   'pools':         { label: 'Pools & RAID', items: ['Active Pools', 'Create Pool', 'Import'] },
   'shares':        { label: 'Shared Folders', items: ['All Shares', 'Create Share', 'Permissions'] },
   'health':        { label: 'Health', items: ['RAID Status', 'SMART', 'Alerts'] },
-  'interfaces':    { label: 'Interfaces', items: ['Ethernet', 'Wi-Fi', 'Settings'] },
-  'remote-access': { label: 'Remote Access', items: ['Status', 'DDNS', 'SSL Certificate', 'HTTPS'] },
-  'ddns':          { label: 'DDNS', items: ['Configuration', 'Status', 'Test'] },
-  'reverse-proxy': { label: 'Reverse Proxy', items: ['Rules', 'Add Rule', 'SSL'] },
-  'smb':           { label: 'SMB / CIFS', items: ['Status', 'Shares', 'Configuration', 'Users'] },
-  'ssh':           { label: 'SSH', items: ['Status', 'Configuration', 'Keys'] },
-  'ftp':           { label: 'FTP / SFTP', items: ['Status', 'Configuration', 'Users'] },
-  'nfs':           { label: 'NFS', items: ['Status', 'Exports', 'Configuration'] },
-  'webdav':        { label: 'WebDAV', items: ['Status', 'Shares', 'Configuration'] },
-  'firewall':      { label: 'Firewall', items: ['Rules', 'Open Ports', 'Add Rule'] },
-  'certificates':  { label: 'Certificates', items: ['Active Certs', 'Request New', 'Renew'] },
+  'interfaces':    { label: 'Interfaces', items: ['Overview'] },
+  'remote-access': { label: 'Remote Access', items: ['Configuration'] },
+  'ddns':          { label: 'DDNS', items: ['Configuration'] },
+  'reverse-proxy': { label: 'Reverse Proxy', items: ['Rules'] },
+  'smb':           { label: 'SMB / CIFS', items: ['Configuration'] },
+  'ssh':           { label: 'SSH', items: ['Configuration'] },
+  'ftp':           { label: 'FTP / SFTP', items: ['Configuration'] },
+  'nfs':           { label: 'NFS', items: ['Configuration'] },
+  'webdav':        { label: 'WebDAV', items: ['Configuration'] },
+  'firewall':      { label: 'Firewall', items: ['Rules'] },
+  'certificates':  { label: 'Certificates', items: ['Management'] },
   '2fa':           { label: '2FA / Login', items: ['Two-Factor Auth', 'Login Settings', 'Password Policy'] },
   'sessions':      { label: 'Sessions', items: ['Active Sessions', 'History'] },
   'backup':        { label: 'Backup', items: ['Create Backup', 'Restore', 'Schedule'] },
@@ -145,6 +152,7 @@ const SECTION_SIDEBAR = {
 // ═══════════════════════════════════
 
 const SECTION_COMPONENTS = {
+  // ─── Appearance ───
   'theme': {
     'Theme':        ThemeSection,
     'Accent Color': AccentSection,
@@ -165,6 +173,37 @@ const SECTION_COMPONENTS = {
   'sysinfo': {
     'System Info': AboutPage,
   },
+
+  // ─── Network (unified sidebar) ───
+  'network-mgr': {
+    'Interfaces':    InterfacesPage,
+    'DNS':           DnsPanel,
+    'Remote Access': RemoteAccessPanel,
+    'Port Exposure': PortsPage,
+    'DDNS':          DDNSPage,
+    'Reverse Proxy': ProxyPanel,
+    'Certificates':  CertsPanel,
+    'SMB / CIFS':    SmbPanel,
+    'FTP / SFTP':    FtpPanel,
+    'SSH':           SshPanel,
+    'NFS':           NfsPanel,
+    'WebDAV':        WebDavPanel,
+    'Firewall':      FirewallPage,
+    'Fail2ban':      Fail2banPage,
+  },
+
+  // ─── Network (individual grid items) ───
+  'interfaces':    { 'Overview':      InterfacesPage },
+  'remote-access': { 'Configuration': RemoteAccessPanel },
+  'ddns':          { 'Configuration': DDNSPage },
+  'reverse-proxy': { 'Rules':         ProxyPanel },
+  'smb':           { 'Configuration': SmbPanel },
+  'ssh':           { 'Configuration': SshPanel },
+  'ftp':           { 'Configuration': FtpPanel },
+  'nfs':           { 'Configuration': NfsPanel },
+  'webdav':        { 'Configuration': WebDavPanel },
+  'firewall':      { 'Rules':         FirewallPage },
+  'certificates':  { 'Management':    CertsPanel },
 };
 
 // ═══════════════════════════════════
