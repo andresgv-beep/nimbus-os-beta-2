@@ -4,7 +4,7 @@ import { APP_REGISTRY, getAppMeta } from '@/apps';
 import Icon from '@icons';
 import styles from './Launcher.module.css';
 
-const SYSTEM_APPS = ['files', 'storage', 'monitor', 'containers', 'network', 'vms', 'terminal', 'texteditor', 'mediaplayer', 'controlpanel', 'settings', 'appstore'];
+const SYSTEM_APPS = ['files', 'storage', 'monitor', 'containers', 'network', 'vms', 'terminal', 'texteditor', 'mediaplayer', 'controlpanel', 'nimsettings', 'settings', 'appstore'];
 
 export default function Launcher({ open, onClose }) {
   const { openWindow } = useWindows();
