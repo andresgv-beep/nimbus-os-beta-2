@@ -5,7 +5,7 @@ import * as Hub from '@icons/hub/index.jsx';
 import styles from './SettingsHub.module.css';
 
 // ═══════════════════════════════════
-// Navigation categories (left sidebar)
+// Navigation categories
 // ═══════════════════════════════════
 
 const NAV_CATEGORIES = [
@@ -18,7 +18,6 @@ const NAV_CATEGORIES = [
   { id: 'about', label: 'About', icon: 'info' },
 ];
 
-// Small nav icons
 function NavIcon({ type, size = 18 }) {
   const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' };
   switch (type) {
@@ -141,28 +140,31 @@ export default function SettingsHub() {
   const [category, setCategory] = useState('system');
   const [section, setSection] = useState(null);
   const [sidebarItem, setSidebarItem] = useState(null);
-  const [sidebarRevealed, setSidebarRevealed] = useState(false);
   const [search, setSearch] = useState('');
   const [exiting, setExiting] = useState(false);
   const [glassFlash, setGlassFlash] = useState(false);
-  const sidebarRef = useRef(null);
   const contentRef = useRef(null);
 
   const perf = perfLevel || 'full';
   const delay = perf === 'full' ? 220 : perf === 'balanced' ? 100 : 0;
 
-  // Select category from nav
+  const sectionDef = section ? SECTION_SIDEBAR[section] : null;
+  const username = user?.username || 'admin';
+  const role = user?.role || 'admin';
+
+  // Normalize section items
+  const sectionItems = sectionDef
+    ? (sectionDef.grouped ? sectionDef.items : (sectionDef.items || []).map(label => ({ label })))
+    : [];
+
+  // Select nav category
   const selectCategory = useCallback((id) => {
-    if (section) {
-      setSection(null);
-      setSidebarItem(null);
-      setSidebarRevealed(false);
-    }
+    if (section) { setSection(null); setSidebarItem(null); }
     setCategory(id);
     setSearch('');
   }, [section]);
 
-  // Open a section from grid icon click
+  // Open section from grid
   const openSection = useCallback((id) => {
     const def = SECTION_SIDEBAR[id];
     const firstItem = def?.grouped ? def.items[0]?.label : (def?.items?.[0] || null);
@@ -170,43 +172,27 @@ export default function SettingsHub() {
     if (perf === 'performance') {
       setSection(id);
       setSidebarItem(firstItem);
-      setSidebarRevealed(true);
       return;
     }
 
     setExiting(true);
-    setSidebarRevealed(false);
     if (perf === 'full') { setGlassFlash(true); setTimeout(() => setGlassFlash(false), 300); }
 
     setTimeout(() => {
       setExiting(false);
       setSection(id);
       setSidebarItem(firstItem);
-
-      requestAnimationFrame(() => {
-        if (sidebarRef.current) {
-          const items = sidebarRef.current.querySelectorAll('[data-ss-item]');
-          items.forEach((el, i) => {
-            const d = perf === 'full' ? i * 35 : i * 12;
-            setTimeout(() => el.classList.add(styles.ssItemRevealed), d);
-          });
-          setTimeout(() => setSidebarRevealed(true), (items.length * (perf === 'full' ? 35 : 12)) + 50);
-        }
-        if (contentRef.current) {
-          requestAnimationFrame(() => contentRef.current?.classList.add(styles.contentRevealed));
-        }
-      });
+      requestAnimationFrame(() => contentRef.current?.classList.add(styles.contentRevealed));
     }, delay);
   }, [perf, delay]);
 
-  // Go back from section to grid
+  // Back to grid
   const goBack = useCallback(() => {
     if (contentRef.current) contentRef.current.classList.remove(styles.contentRevealed);
-    setSidebarRevealed(false);
-    setTimeout(() => { setSection(null); setSidebarItem(null); }, perf === 'performance' ? 0 : 80);
+    setTimeout(() => { setSection(null); setSidebarItem(null); }, perf === 'performance' ? 0 : 60);
   }, [perf]);
 
-  // Select sidebar item within section
+  // Select sidebar item
   const selectSidebarItem = useCallback((label) => {
     if (contentRef.current) contentRef.current.classList.remove(styles.contentRevealed);
     setTimeout(() => {
@@ -215,102 +201,97 @@ export default function SettingsHub() {
     }, perf === 'performance' ? 0 : 40);
   }, [perf]);
 
-  // Filter grid items
+  // Filter grid
   const gridItems = (GRID[category] || []).filter(
     item => !search || item.label.toLowerCase().includes(search.toLowerCase())
   );
   const gridTitle = gridItems[0]?.title || category.charAt(0).toUpperCase() + category.slice(1);
 
-  const sectionDef = section ? SECTION_SIDEBAR[section] : null;
-  const username = user?.username || 'admin';
-  const role = user?.role || 'admin';
-
-  // Normalize section items to objects
-  const sectionItems = sectionDef
-    ? (sectionDef.grouped ? sectionDef.items : (sectionDef.items || []).map(label => ({ label })))
-    : [];
-
   return (
     <div className={styles.layout}>
-      {/* ─── Left Navigation ─── */}
+      {/* ─── Sidebar (transforms between nav and section) ─── */}
       <div className={styles.nav}>
-        <div className={styles.profile} onClick={() => selectCategory('system')}>
-          <div className={styles.avatar}>{username.charAt(0).toUpperCase()}</div>
-          <div className={styles.profileInfo}>
-            <div className={styles.profileName}>{username}</div>
-            <div className={styles.profileRole}>{role}</div>
-          </div>
-        </div>
-
-        <div className={styles.navSearch}>
-          <SearchIcon size={13} />
-          <input
-            className={styles.navSearchInput}
-            placeholder="Search..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-        </div>
-
-        {NAV_CATEGORIES.map((cat, i) => {
-          if (cat === 'sep') return <div key={i} className={styles.navSep} />;
-          return (
-            <div
-              key={cat.id}
-              className={`${styles.navItem} ${category === cat.id && !section ? styles.navItemActive : ''}`}
-              onClick={() => selectCategory(cat.id)}
-            >
-              <div className={styles.navIcon}><NavIcon type={cat.icon} size={18} /></div>
-              {cat.label}
+        {!section ? (
+          <>
+            {/* NAV MODE: profile + search + categories */}
+            <div className={styles.profile} onClick={() => selectCategory('system')}>
+              <div className={styles.avatar}>{username.charAt(0).toUpperCase()}</div>
+              <div className={styles.profileInfo}>
+                <div className={styles.profileName}>{username}</div>
+                <div className={styles.profileRole}>{role}</div>
+              </div>
             </div>
-          );
-        })}
+
+            <div className={styles.navSearch}>
+              <SearchIcon size={13} />
+              <input
+                className={styles.navSearchInput}
+                placeholder="Search..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+            </div>
+
+            {NAV_CATEGORIES.map((cat, i) => {
+              if (cat === 'sep') return <div key={i} className={styles.navSep} />;
+              return (
+                <div
+                  key={cat.id}
+                  className={`${styles.navItem} ${category === cat.id ? styles.navItemActive : ''}`}
+                  onClick={() => selectCategory(cat.id)}
+                >
+                  <div className={styles.navIcon}><NavIcon type={cat.icon} size={18} /></div>
+                  {cat.label}
+                </div>
+              );
+            })}
+          </>
+        ) : (
+          <>
+            {/* SECTION MODE: back + section items */}
+            <div className={styles.sectionBack} onClick={goBack}>
+              <ChevronLeftIcon size={14} />
+              <span className={styles.sectionBackName}>{sectionDef.label}</span>
+            </div>
+
+            <div className={styles.sectionItems}>
+              {sectionItems.map((item) => {
+                const label = typeof item === 'string' ? item : item.label;
+                const sectionLabel = typeof item === 'object' ? item.section : null;
+                return (
+                  <div key={label}>
+                    {sectionLabel && <div className={styles.ssLabel}>{sectionLabel}</div>}
+                    <div
+                      className={`${styles.ssItem} ${sidebarItem === label ? styles.ssItemActive : ''}`}
+                      onClick={() => selectSidebarItem(label)}
+                    >
+                      {label}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
 
       {/* ─── Content ─── */}
       <div className={styles.content}>
         <div className={`${styles.glassOverlay} ${glassFlash ? styles.glassFlash : ''}`} />
 
-        {/* Section view */}
-        {section && sectionDef ? (
-          <div className={styles.sectionLayout}>
-            <div className={styles.sectionSidebar} ref={sidebarRef}>
-              <div className={styles.sectionBack} onClick={goBack}>
-                <ChevronLeftIcon size={14} />
-                <span className={styles.sectionBackName}>{sectionDef.label}</span>
-              </div>
-              <div className={styles.sectionItems}>
-                {sectionItems.map((item, i) => {
-                  const label = typeof item === 'string' ? item : item.label;
-                  const sectionLabel = typeof item === 'object' ? item.section : null;
-                  return (
-                    <div key={label}>
-                      {sectionLabel && <div className={styles.ssLabel}>{sectionLabel}</div>}
-                      <div
-                        data-ss-item
-                        className={`${styles.ssItem} ${sidebarItem === label ? styles.ssItemActive : ''} ${(perf === 'performance' || sidebarRevealed) ? styles.ssItemRevealed : ''}`}
-                        onClick={() => selectSidebarItem(label)}
-                      >
-                        {label}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className={styles.sectionContent}>
-              <div
-                className={`${styles.contentInner} ${perf === 'performance' ? styles.contentRevealed : ''}`}
-                ref={contentRef}
-              >
-                {/* TODO: Render actual components here */}
-                <div className={styles.placeholder}>
-                  {sectionDef.label} › {sidebarItem || '...'}<br />
-                  <span style={{ fontSize: 11, marginTop: 8, display: 'block', opacity: 0.5 }}>
-                    Component will be ported here
-                  </span>
-                </div>
+        {section ? (
+          /* Section content */
+          <div className={styles.sectionContent}>
+            <div
+              className={`${styles.contentInner} ${perf === 'performance' ? styles.contentRevealed : ''}`}
+              ref={contentRef}
+            >
+              {/* TODO: Render actual components here */}
+              <div className={styles.placeholder}>
+                {sectionDef.label} › {sidebarItem || '...'}<br />
+                <span style={{ fontSize: 11, marginTop: 8, display: 'block', opacity: 0.5 }}>
+                  Component will be ported here
+                </span>
               </div>
             </div>
           </div>

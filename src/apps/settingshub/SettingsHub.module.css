@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════
-   NimSettings — Sidebar + Content layout
+   NimSettings — Single sidebar + Content
+   Sidebar transforms between nav and section mode
    ═══════════════════════════════════ */
 
 .layout {
@@ -8,7 +9,7 @@
   overflow: hidden;
 }
 
-/* ─── Left Navigation Sidebar ─── */
+/* ─── Sidebar (nav or section mode) ─── */
 .nav {
   width: 250px;
   min-width: 250px;
@@ -20,7 +21,7 @@
   overflow-y: auto;
 }
 
-/* Profile */
+/* ─── Profile ─── */
 .profile {
   display: flex;
   align-items: center;
@@ -71,7 +72,7 @@
   letter-spacing: 0.5px;
 }
 
-/* Search */
+/* ─── Search ─── */
 .navSearch {
   display: flex;
   align-items: center;
@@ -95,7 +96,7 @@
 
 .navSearchInput::placeholder { color: var(--text-muted); }
 
-/* Category items */
+/* ─── Nav items ─── */
 .navItem {
   display: flex;
   align-items: center;
@@ -138,6 +139,60 @@
   margin: 8px 16px;
 }
 
+/* ─── Section back button (in sidebar) ─── */
+.sectionBack {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+[data-perf-level="full"] .sectionBack { transition: background 0.15s; }
+.sectionBack:hover { background: var(--bg-hover); }
+.sectionBack svg { opacity: 0.4; }
+.sectionBackName { color: var(--text-primary); font-weight: 600; }
+
+/* ─── Section sidebar items ─── */
+.sectionItems {
+  padding: 6px 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.ssLabel {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--text-muted);
+  padding: 12px 16px 4px;
+  opacity: 0.5;
+}
+
+.ssItem {
+  padding: 7px 16px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-left: 2px solid transparent;
+}
+
+[data-perf-level="full"] .ssItem { transition: color 0.15s, background 0.15s, border-left-color 0.15s; }
+[data-perf-level="balanced"] .ssItem { transition: color 0.1s, background 0.1s; }
+
+.ssItem:hover { color: var(--text-primary); background: var(--bg-hover); }
+
+.ssItemActive {
+  color: var(--accent);
+  background: rgba(233, 84, 32, 0.06);
+  border-left-color: var(--accent);
+}
+
 /* ─── Content Area ─── */
 .content {
   flex: 1;
@@ -145,7 +200,7 @@
   position: relative;
 }
 
-/* ─── Glass overlay (full mode transition) ─── */
+/* ─── Glass overlay ─── */
 .glassOverlay {
   position: absolute;
   inset: 0;
@@ -188,7 +243,6 @@
   padding: 18px 10px;
   border-radius: var(--radius);
   cursor: pointer;
-  position: relative;
 }
 
 [data-perf-level="full"] .gridItem { transition: all 0.25s cubic-bezier(0.2,0,0,1); }
@@ -226,7 +280,7 @@
 [data-perf-level="full"] .gridLabel { transition: color 0.15s; }
 .gridItem:hover .gridLabel { color: var(--text-primary); }
 
-/* Grid exit animation */
+/* Grid exit */
 .gridExiting .gridItem { opacity: 0; transform: scale(0.92); }
 
 [data-perf-level="full"] .gridExiting .gridItem {
@@ -247,83 +301,10 @@
 [data-perf-level="full"] .gridExiting .gridItem:nth-child(9) { transition-delay: 120ms; }
 [data-perf-level="full"] .gridExiting .gridItem:nth-child(10) { transition-delay: 135ms; }
 
-/* ─── Section View (inner sidebar + content) ─── */
-.sectionLayout {
-  display: flex;
-  height: 100%;
-}
-
-/* Section inner sidebar */
-.sectionSidebar {
-  width: 180px;
-  min-width: 180px;
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-}
-
-.sectionBack {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  font-size: 12.5px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-[data-perf-level="full"] .sectionBack { transition: background 0.15s; }
-.sectionBack:hover { background: var(--bg-hover); }
-.sectionBack svg { opacity: 0.4; }
-.sectionBackName { color: var(--text-primary); font-weight: 600; }
-
-.sectionItems { padding: 6px 0; flex: 1; }
-
-.ssLabel {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.7px;
-  color: var(--text-muted);
-  padding: 12px 16px 4px;
-  opacity: 0.5;
-}
-
-.ssItem {
-  padding: 7px 16px;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--text-muted);
-  cursor: pointer;
-  border-left: 2px solid transparent;
-  opacity: 0;
-  transform: translateX(-6px);
-}
-
-[data-perf-level="full"] .ssItem {
-  transition: opacity 0.22s, transform 0.28s cubic-bezier(0.2,0,0,1), color 0.15s, background 0.15s, border-left-color 0.15s;
-}
-[data-perf-level="balanced"] .ssItem {
-  transition: opacity 0.1s, transform 0.1s ease, color 0.1s, background 0.1s;
-}
-[data-perf-level="performance"] .ssItem { transition: none; opacity: 1; transform: none; }
-
-.ssItemRevealed { opacity: 1; transform: translateX(0); }
-
-.ssItem:hover { color: var(--text-primary); background: var(--bg-hover); }
-
-.ssItemActive {
-  color: var(--accent);
-  background: rgba(233,84,32,0.06);
-  border-left-color: var(--accent);
-}
-
-/* Section content */
+/* ─── Section Content ─── */
 .sectionContent {
-  flex: 1;
   padding: var(--space-5);
+  height: 100%;
   overflow-y: auto;
 }
 
