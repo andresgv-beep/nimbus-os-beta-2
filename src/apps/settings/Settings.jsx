@@ -315,20 +315,27 @@ function IconsSection() {
 function DockSection() {
   const { autoHideTaskbar, clock24, taskbarPosition, taskbarSize,
           setAutoHideTaskbar, setClock24, setTaskbarPosition, setTaskbarSize } = useTheme();
+  const rowStyle = {
+    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+    padding: '14px 0', borderBottom: '1px solid var(--border)',
+  };
+  const lastRowStyle = { ...rowStyle, borderBottom: 'none' };
+  const labelStyle = { fontSize: 'var(--text-base)', color: 'var(--text-secondary)' };
+
   return (
     <div className={styles.card}>
       <div className={styles.cardLabel}>Dock</div>
-      <div className={styles.toggleGrid}>
-        <div className={styles.toggleRow}>
-          <span>Auto-hide dock</span>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div style={rowStyle}>
+          <span style={labelStyle}>Auto-hide dock</span>
           <Toggle on={autoHideTaskbar} onChange={() => setAutoHideTaskbar(!autoHideTaskbar)} />
         </div>
-        <div className={styles.toggleRow}>
-          <span>24-hour clock</span>
+        <div style={rowStyle}>
+          <span style={labelStyle}>24-hour clock</span>
           <Toggle on={clock24} onChange={() => setClock24(!clock24)} />
         </div>
-        <div className={styles.toggleRow}>
-          <span>Position</span>
+        <div style={rowStyle}>
+          <span style={labelStyle}>Position</span>
           <div className={styles.segmentedControlSmall}>
             <div className={`${styles.segmentSmall} ${taskbarPosition === 'bottom' ? styles.segmentSmallActive : ''}`}
               onClick={() => setTaskbarPosition('bottom')}>Bottom</div>
@@ -336,8 +343,8 @@ function DockSection() {
               onClick={() => setTaskbarPosition('left')}>Left</div>
           </div>
         </div>
-        <div className={styles.toggleRow}>
-          <span>Size</span>
+        <div style={lastRowStyle}>
+          <span style={labelStyle}>Size</span>
           <div className={styles.segmentedControlSmall}>
             {['small', 'medium', 'large'].map(s => (
               <div key={s}
