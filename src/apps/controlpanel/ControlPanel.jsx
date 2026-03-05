@@ -1162,6 +1162,9 @@ function PlaceholderPage({ title }) {
   );
 }
 
+// Named exports for SettingsHub integration
+export { UsersPage, SharedFoldersPage, AppPermissionsPage, UpdatesPage, LoginSettingsPage, PlaceholderPage };
+
 /* ─── Main ─── */
 export default function ControlPanel() {
   const [active, setActive] = useState('users');
