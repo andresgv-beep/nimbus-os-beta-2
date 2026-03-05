@@ -71,9 +71,23 @@ const GRID = {
     { id: 'updates', label: 'Updates', icon: Hub.HubUpdatesIcon },
     { id: 'power', label: 'Power', icon: Hub.HubPowerIcon },
   ],
-  // storage and network categories open sections directly (no grid)
-  network: [],
-  storage: [],
+  storage: [
+    { id: 'storage-mgr', label: 'Storage Manager', icon: Hub.HubStorageIcon, title: 'Storage' },
+    { id: 'disks', label: 'Disks', icon: Hub.HubDisksIcon },
+    { id: 'pools', label: 'Pools & RAID', icon: Hub.HubPoolsIcon },
+    { id: 'health', label: 'Health', icon: Hub.HubHealthIcon },
+  ],
+  network: [
+    { id: 'network-mgr', label: 'Network Manager', icon: Hub.HubNetworkIcon, title: 'Network & Services' },
+    { id: 'remote-access', label: 'Remote Access', icon: Hub.HubRemoteAccessIcon },
+    { id: 'ddns', label: 'DDNS', icon: Hub.HubDdnsIcon },
+    { id: 'reverse-proxy', label: 'Reverse Proxy', icon: Hub.HubReverseProxyIcon },
+    { id: 'smb', label: 'SMB / CIFS', icon: Hub.HubSmbIcon },
+    { id: 'ssh', label: 'SSH', icon: Hub.HubSshIcon },
+    { id: 'ftp', label: 'FTP / SFTP', icon: Hub.HubFtpIcon },
+    { id: 'nfs', label: 'NFS', icon: Hub.HubNfsIcon },
+    { id: 'webdav', label: 'WebDAV', icon: Hub.HubWebDavIcon },
+  ],
   security: [
     { id: '2fa', label: '2FA / Login', icon: Hub.HubLockIcon, title: 'Security' },
     { id: 'sessions', label: 'Sessions', icon: Hub.HubSessionsIcon },
@@ -121,6 +135,22 @@ const SECTION_SIDEBAR = {
   'sessions':      { label: 'Sessions', items: ['Active Sessions'] },
   'backup':        { label: 'Backup', items: ['Backup & Restore'] },
   'logs':          { label: 'Logs', items: ['System Log'] },
+  // ─── Storage (individual grid items) ───
+  'disks':         { label: 'Disks', items: ['Physical Disks', 'SMART Health'] },
+  'pools':         { label: 'Pools & RAID', grouped: true, items: [
+    { label: 'Pools', section: 'Storage' },
+    { label: 'Create Pool', section: 'Actions' }, { label: 'Restore Pool' },
+  ]},
+  'health':        { label: 'Health', items: ['SMART Health'] },
+  // ─── Network (individual grid items) ───
+  'remote-access': { label: 'Remote Access', items: ['Configuration'] },
+  'ddns':          { label: 'DDNS', items: ['Configuration'] },
+  'reverse-proxy': { label: 'Reverse Proxy', items: ['Rules'] },
+  'smb':           { label: 'SMB / CIFS', items: ['Configuration'] },
+  'ssh':           { label: 'SSH', items: ['Configuration'] },
+  'ftp':           { label: 'FTP / SFTP', items: ['Configuration'] },
+  'nfs':           { label: 'NFS', items: ['Configuration'] },
+  'webdav':        { label: 'WebDAV', items: ['Configuration'] },
   'theme':         { label: 'Appearance', items: ['Theme', 'Accent Color', 'Performance', 'Window Glow'] },
   'wallpaper':     { label: 'Desktop', items: ['Wallpaper', 'Icons', 'Dock', 'Text Size'] },
   'taskbar':       { label: 'Taskbar', items: ['Position', 'Size', 'Auto-hide', 'Pinned Apps'] },
@@ -195,6 +225,21 @@ const SECTION_COMPONENTS = {
   'portal':  { 'Web Portal':      PortalPage },
   'updates': { 'System Updates':   UpdatesPage },
   '2fa':     { 'Login Settings':   LoginSettingsPage },
+
+  // ─── Storage (individual grid items) ───
+  'disks':  { 'Physical Disks': StorageDisksView, 'SMART Health': StorageSmartView },
+  'pools':  { 'Pools': StoragePoolsView, 'Create Pool': StorageCreateView, 'Restore Pool': StorageRestoreView },
+  'health': { 'SMART Health': StorageSmartView },
+
+  // ─── Network (individual grid items) ───
+  'remote-access': { 'Configuration': RemoteAccessPanel },
+  'ddns':          { 'Configuration': DDNSPage },
+  'reverse-proxy': { 'Rules':         ProxyPanel },
+  'smb':           { 'Configuration': SmbPanel },
+  'ssh':           { 'Configuration': SshPanel },
+  'ftp':           { 'Configuration': FtpPanel },
+  'nfs':           { 'Configuration': NfsPanel },
+  'webdav':        { 'Configuration': WebDavPanel },
 };
 
 // ═══════════════════════════════════
@@ -202,7 +247,7 @@ const SECTION_COMPONENTS = {
 // Lives outside SettingsHub so provider doesn't re-mount on sidebar item change
 // ═══════════════════════════════════
 
-const PROVIDER_SECTIONS = { 'storage-mgr': StorageProvider };
+const PROVIDER_SECTIONS = { 'storage-mgr': StorageProvider, 'disks': StorageProvider, 'pools': StorageProvider, 'health': StorageProvider };
 
 function SectionRendererInner({ section, sidebarItem, sectionDef }) {
   const sectionMap = SECTION_COMPONENTS[section];
@@ -253,30 +298,12 @@ export default function SettingsHub() {
     ? (sectionDef.grouped ? sectionDef.items : (sectionDef.items || []).map(label => ({ label })))
     : [];
 
-// Categories that skip the grid and open a section directly
-const DIRECT_SECTION_MAP = {
-  'storage': 'storage-mgr',
-  'network': 'network-mgr',
-};
-
   // Select nav category
   const selectCategory = useCallback((id) => {
     if (section) { setSection(null); setSidebarItem(null); }
     setCategory(id);
     setSearch('');
-
-    // Some categories open a section directly (no grid)
-    const directSection = DIRECT_SECTION_MAP[id];
-    if (directSection) {
-      const def = SECTION_SIDEBAR[directSection];
-      const firstItem = def?.grouped ? def.items[0]?.label : (def?.items?.[0] || null);
-      setTimeout(() => {
-        setSection(directSection);
-        setSidebarItem(firstItem);
-        requestAnimationFrame(() => contentRef.current?.classList.add(styles.contentRevealed));
-      }, perf === 'performance' ? 0 : 50);
-    }
-  }, [section, perf]);
+  }, [section]);
 
   // Open section from grid
   const openSection = useCallback((id) => {
