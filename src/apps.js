@@ -125,6 +125,15 @@ export const APP_REGISTRY = {
     defaultSize: { width: 900, height: 600 },
     category: 'system',
   },
+  nimsettings: {
+    id: 'nimsettings',
+    title: 'NimSettings',
+    color: '#4A5568',
+    icon: 'settings',
+    appIcon: null,
+    defaultSize: { width: 960, height: 600 },
+    category: 'system',
+  },
   appstore: {
     id: 'appstore',
     title: 'App Store',
