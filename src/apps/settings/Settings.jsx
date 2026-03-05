@@ -148,12 +148,12 @@ function Toggle({ on, onChange }) {
   );
 }
 
-function AppearancePage() {
-  const { theme, accentColor,
-          glowIntensity,
-          perfLevel, perfIsManual, gpuInfo, setPerfLevel, resetPerfLevel,
-          setTheme, setAccentColor,
-          setGlowIntensity } = useTheme();
+// ═══════════════════════════════════
+// Sub-components (used by both Settings standalone and SettingsHub)
+// ═══════════════════════════════════
+
+function PerformanceSection() {
+  const { perfLevel, perfIsManual, gpuInfo, setPerfLevel, resetPerfLevel } = useTheme();
   const { token } = useAuth();
   
   const [serverGpu, setServerGpu] = useState(null);
@@ -165,21 +165,12 @@ function AppearancePage() {
       .catch(() => {});
   }, [token]);
 
-  const TEXT_SIZES = [
-    { value: 75, label: 'XS' },
-    { value: 85, label: 'S' },
-    { value: 100, label: 'M' },
-    { value: 110, label: 'L' },
-    { value: 120, label: 'XL' },
-  ];
-
   const PERF_OPTIONS = [
     { id: 'full', label: 'Full', desc: 'All effects enabled', icon: perfFullImg },
     { id: 'balanced', label: 'Balanced', desc: 'Reduced blur', icon: perfBalancedImg },
     { id: 'performance', label: 'Performance', desc: 'Flat, no effects', icon: perfPerformanceImg },
   ];
 
-  // GPU tier display
   const gpuTierLabel = gpuInfo ? {
     'dedicated': { text: 'Dedicated GPU', color: 'var(--accent-green)' },
     'apple-silicon': { text: 'Apple Silicon', color: 'var(--accent-green)' },
@@ -189,349 +180,360 @@ function AppearancePage() {
   }[gpuInfo.tier] || { text: 'Unknown', color: 'var(--text-muted)' } : null;
 
   return (
-    <>
-      <h3 className={styles.pageTitle}>Appearance</h3>
-
-      {/* Performance / GPU Section - Moved to top for visibility */}
-      <div className={styles.card}>
-        <div className={styles.cardLabel}>
-          Performance
-          {serverGpu?.gpus?.length > 0 ? (
-            <span className={styles.gpuBadge} style={{ color: 'var(--accent-green)' }}>
-              {serverGpu.gpus.length > 1 ? `${serverGpu.gpus.length} GPUs` 
-                : (serverGpu.gpus[0]?.vendor || 'gpu').toUpperCase() + ' GPU'}
-            </span>
-          ) : gpuInfo ? (
-            <span className={styles.gpuBadge} style={{ color: gpuTierLabel.color }}>
-              {gpuTierLabel.text}
-            </span>
-          ) : null}
-        </div>
-        
-        {/* Server GPU Info (real hardware) */}
+    <div className={styles.card}>
+      <div className={styles.cardLabel}>
+        Performance
         {serverGpu?.gpus?.length > 0 ? (
-          <div className={styles.gpuInfo}>
-            <span className={styles.gpuRenderer}>{serverGpu.gpus.map(g => g.description).join(' · ')}</span>
-            {serverGpu.currentDriver && <span className={styles.gpuAuto}>Driver: {serverGpu.currentDriver} {serverGpu.driverVersion || ''}</span>}
-            {!serverGpu.currentDriver && <span className={styles.gpuAuto}>No proprietary driver loaded</span>}
-          </div>
-        ) : !serverGpu && gpuInfo ? (
-          <div className={styles.gpuInfo}>
-            <span className={styles.gpuRenderer}>{gpuInfo.renderer}</span>
-            {!perfIsManual && <span className={styles.gpuAuto}>Auto-configured</span>}
-          </div>
-        ) : !serverGpu ? (
-          <div className={styles.gpuInfo}>
-            <span className={styles.gpuAuto}>Detecting GPU...</span>
-          </div>
+          <span className={styles.gpuBadge} style={{ color: 'var(--accent-green)' }}>
+            {serverGpu.gpus.length > 1 ? `${serverGpu.gpus.length} GPUs` 
+              : (serverGpu.gpus[0]?.vendor || 'gpu').toUpperCase() + ' GPU'}
+          </span>
+        ) : gpuInfo ? (
+          <span className={styles.gpuBadge} style={{ color: gpuTierLabel.color }}>
+            {gpuTierLabel.text}
+          </span>
         ) : null}
+      </div>
+      
+      {serverGpu?.gpus?.length > 0 ? (
+        <div className={styles.gpuInfo}>
+          <span className={styles.gpuRenderer}>{serverGpu.gpus.map(g => g.description).join(' · ')}</span>
+          {serverGpu.currentDriver && <span className={styles.gpuAuto}>Driver: {serverGpu.currentDriver} {serverGpu.driverVersion || ''}</span>}
+          {!serverGpu.currentDriver && <span className={styles.gpuAuto}>No proprietary driver loaded</span>}
+        </div>
+      ) : !serverGpu && gpuInfo ? (
+        <div className={styles.gpuInfo}>
+          <span className={styles.gpuRenderer}>{gpuInfo.renderer}</span>
+          {!perfIsManual && <span className={styles.gpuAuto}>Auto-configured</span>}
+        </div>
+      ) : !serverGpu ? (
+        <div className={styles.gpuInfo}>
+          <span className={styles.gpuAuto}>Detecting GPU...</span>
+        </div>
+      ) : null}
 
-        {/* Performance Level Selector */}
-        <div className={styles.perfSelector}>
-          {PERF_OPTIONS.map(opt => (
-            <div
-              key={opt.id}
-              className={`${styles.perfOption} ${perfLevel === opt.id ? styles.perfOptionActive : ''}`}
-              onClick={() => setPerfLevel(opt.id, true)}
-            >
-              <img src={opt.icon} alt={opt.label} className={styles.perfIcon} />
-              <div className={styles.perfText}>
-                <span className={styles.perfLabel}>{opt.label}</span>
-                <span className={styles.perfDesc}>{opt.desc}</span>
+      <div className={styles.perfSelector}>
+        {PERF_OPTIONS.map(opt => (
+          <div
+            key={opt.id}
+            className={`${styles.perfOption} ${perfLevel === opt.id ? styles.perfOptionActive : ''}`}
+            onClick={() => setPerfLevel(opt.id, true)}
+          >
+            <img src={opt.icon} alt={opt.label} className={styles.perfIcon} />
+            <div className={styles.perfText}>
+              <span className={styles.perfLabel}>{opt.label}</span>
+              <span className={styles.perfDesc}>{opt.desc}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {perfIsManual && (
+        <button className={styles.resetAutoBtn} onClick={resetPerfLevel}>
+          ↺ Reset to auto-detected
+        </button>
+      )}
+    </div>
+  );
+}
+
+function ThemeSection() {
+  const { theme, setTheme } = useTheme();
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardLabel}>Theme</div>
+      <div className={styles.themeRow}>
+        {THEMES.map(t => (
+          <div
+            key={t.id}
+            className={`${styles.themePreview} ${theme === t.id ? styles.themeSelected : ''}`}
+            onClick={() => setTheme(t.id)}
+          >
+            <div className={styles.themeBox} style={{ background: t.bg, borderColor: theme === t.id ? t.accent : 'var(--border)' }}>
+              <div className={styles.themeSidebar} style={{ background: t.sidebar }} />
+              <div className={styles.themeContent}>
+                <div className={styles.themeBar} style={{ background: t.bars, width: '60%' }} />
+                <div className={styles.themeBar} style={{ background: t.bars, width: '80%' }} />
+                <div style={{ flex: 1 }} />
+                <div className={styles.themeBar} style={{ background: t.accent, width: '40%' }} />
               </div>
             </div>
-          ))}
-        </div>
+            <span className={styles.themeLabel} style={theme === t.id ? { color: t.accent, fontWeight: 500 } : {}}>{t.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-        {/* Reset to auto button */}
-        {perfIsManual && (
-          <button className={styles.resetAutoBtn} onClick={resetPerfLevel}>
-            ↺ Reset to auto-detected
-          </button>
+function AccentSection() {
+  const { accentColor, setAccentColor } = useTheme();
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardLabel}>Accent Color</div>
+      <CustomAccentPicker accents={ACCENTS} accentColor={accentColor} setAccentColor={setAccentColor} />
+    </div>
+  );
+}
+
+function GlowSection() {
+  const { glowIntensity, perfLevel, setGlowIntensity } = useTheme();
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardLabel}>Window Glow</div>
+      <div className={styles.glowSection}>
+        <div className={styles.glowSliderRow}>
+          <span className={styles.glowLabel}>Subtle</span>
+          <input type="range" min="0" max="100" value={glowIntensity}
+            onChange={(e) => setGlowIntensity(Number(e.target.value))}
+            className={styles.glowSlider} disabled={perfLevel === 'performance'} />
+          <span className={styles.glowLabel}>Intense</span>
+        </div>
+        <div className={styles.sliderHint}>
+          {perfLevel === 'performance' ? 'Disabled in Performance mode' : `${glowIntensity}%`}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function IconsSection() {
+  const { showDesktopIcons, setShowDesktopIcons } = useTheme();
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardLabel}>Icons</div>
+      <div className={styles.toggleGrid}>
+        <div className={styles.toggleRow}>
+          <span>Show desktop icons</span>
+          <Toggle on={showDesktopIcons} onChange={() => setShowDesktopIcons(!showDesktopIcons)} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DockSection() {
+  const { autoHideTaskbar, clock24, taskbarPosition, taskbarSize,
+          setAutoHideTaskbar, setClock24, setTaskbarPosition, setTaskbarSize } = useTheme();
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardLabel}>Dock</div>
+      <div className={styles.toggleGrid}>
+        <div className={styles.toggleRow}>
+          <span>Auto-hide dock</span>
+          <Toggle on={autoHideTaskbar} onChange={() => setAutoHideTaskbar(!autoHideTaskbar)} />
+        </div>
+        <div className={styles.toggleRow}>
+          <span>24-hour clock</span>
+          <Toggle on={clock24} onChange={() => setClock24(!clock24)} />
+        </div>
+        <div className={styles.toggleRow}>
+          <span>Position</span>
+          <div className={styles.segmentedControlSmall}>
+            <div className={`${styles.segmentSmall} ${taskbarPosition === 'bottom' ? styles.segmentSmallActive : ''}`}
+              onClick={() => setTaskbarPosition('bottom')}>Bottom</div>
+            <div className={`${styles.segmentSmall} ${taskbarPosition === 'left' ? styles.segmentSmallActive : ''}`}
+              onClick={() => setTaskbarPosition('left')}>Left</div>
+          </div>
+        </div>
+        <div className={styles.toggleRow}>
+          <span>Size</span>
+          <div className={styles.segmentedControlSmall}>
+            {['small', 'medium', 'large'].map(s => (
+              <div key={s}
+                className={`${styles.segmentSmall} ${taskbarSize === s ? styles.segmentSmallActive : ''}`}
+                onClick={() => setTaskbarSize(s)}>
+                {s[0].toUpperCase()}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WallpaperSection() {
+  const { wallpaper, setWallpaper } = useTheme();
+  const { token } = useAuth();
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardLabel}>Wallpaper</div>
+      <div className={styles.wallpaperRow}>
+        <div className={styles.wallpaperControls}>
+          <div
+            className={`${styles.wallpaperItem} ${!wallpaper ? styles.wallpaperSelected : ''}`}
+            onClick={() => setWallpaper('')}
+          >
+            <div className={styles.wallpaperNone}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </div>
+            <span>None</span>
+          </div>
+          <label className={styles.wallpaperUpload}>
+            <input type="file" accept="image/*" style={{ display: 'none' }}
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                  const dataUrl = ev.target.result;
+                  setWallpaper(dataUrl, true);
+                  try {
+                    const res = await fetch('/api/user/wallpaper', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                      body: JSON.stringify({ data: dataUrl, filename: file.name })
+                    });
+                    const result = await res.json();
+                    if (result.url) setWallpaper(result.url + '?t=' + Date.now());
+                  } catch (err) {
+                    console.error('[Wallpaper] Upload failed:', err.message);
+                  }
+                };
+                reader.readAsDataURL(file);
+                e.target.value = '';
+              }}
+            />
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Upload
+          </label>
+        </div>
+        {wallpaper && (
+          <div className={styles.wallpaperPreviewLarge}>
+            <img src={wallpaper} alt="Current wallpaper" />
+          </div>
         )}
       </div>
+    </div>
+  );
+}
 
-      <div className={styles.card}>
-        <div className={styles.cardLabel}>Theme</div>
-        <div className={styles.themeRow}>
-          {THEMES.map(t => (
-            <div
-              key={t.id}
-              className={`${styles.themePreview} ${theme === t.id ? styles.themeSelected : ''}`}
-              onClick={() => setTheme(t.id)}
-            >
-              <div className={styles.themeBox} style={{ background: t.bg, borderColor: theme === t.id ? t.accent : 'var(--border)' }}>
-                <div className={styles.themeSidebar} style={{ background: t.sidebar }} />
-                <div className={styles.themeContent}>
-                  <div className={styles.themeBar} style={{ background: t.bars, width: '60%' }} />
-                  <div className={styles.themeBar} style={{ background: t.bars, width: '80%' }} />
-                  <div style={{ flex: 1 }} />
-                  <div className={styles.themeBar} style={{ background: t.accent, width: '40%' }} />
-                </div>
-              </div>
-              <span className={styles.themeLabel} style={theme === t.id ? { color: t.accent, fontWeight: 500 } : {}}>{t.label}</span>
+function TextSizeSection() {
+  const { textScale, setTextScale } = useTheme();
+  const TEXT_SIZES = [
+    { value: 80, label: 'XS' }, { value: 90, label: 'S' },
+    { value: 100, label: 'M' }, { value: 110, label: 'L' }, { value: 120, label: 'XL' },
+  ];
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardLabel}>Text Size</div>
+      <div className={styles.sliderSection}>
+        <div className={styles.sliderLabel}>
+          <span style={{ fontSize: 11 }}>A</span>
+          <span style={{ fontSize: 18, fontWeight: 500 }}>A</span>
+        </div>
+        <div className={styles.sizeSteps}>
+          {TEXT_SIZES.map(s => (
+            <div key={s.value}
+              className={`${styles.sizeStep} ${textScale === s.value ? styles.sizeStepActive : ''}`}
+              onClick={() => setTextScale(s.value)}>
+              <div className={styles.sizeStepDot} />
+              <span>{s.label}</span>
             </div>
           ))}
         </div>
+        <div className={styles.sliderHint}>{textScale}% — {textScale === 100 ? 'Default' : textScale < 100 ? 'Compact' : 'Large'}</div>
       </div>
+    </div>
+  );
+}
 
-      <div className={styles.card}>
-        <div className={styles.cardLabel}>Accent Color</div>
-        <CustomAccentPicker 
-          accents={ACCENTS} 
-          accentColor={accentColor} 
-          setAccentColor={setAccentColor} 
-        />
-      </div>
-
-      <div className={styles.card}>
-        <div className={styles.cardLabel}>Window Glow</div>
-        <div className={styles.glowSection}>
-          <div className={styles.glowSliderRow}>
-            <span className={styles.glowLabel}>Subtle</span>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={glowIntensity}
-              onChange={(e) => setGlowIntensity(Number(e.target.value))}
-              className={styles.glowSlider}
-              disabled={perfLevel === 'performance'}
-            />
-            <span className={styles.glowLabel}>Intense</span>
-          </div>
-          <div className={styles.sliderHint}>
-            {perfLevel === 'performance' ? 'Disabled in Performance mode' : `${glowIntensity}%`}
-          </div>
+function WidgetGeneralSection() {
+  const { showWidgets, setShowWidgets } = useTheme();
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardLabel}>General</div>
+      <div className={styles.toggleGrid}>
+        <div className={styles.toggleRow}>
+          <span>Show widgets panel</span>
+          <Toggle on={showWidgets} onChange={() => setShowWidgets(!showWidgets)} />
         </div>
       </div>
+    </div>
+  );
+}
+
+function WidgetScaleSection() {
+  const { widgetScale, setWidgetScale } = useTheme();
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardLabel}>Size</div>
+      <div className={styles.segmentedControl}>
+        {[{ value: 80, label: 'Small' }, { value: 100, label: 'Medium' }, { value: 120, label: 'Large' }].map(s => (
+          <div key={s.value}
+            className={`${styles.segment} ${widgetScale === s.value ? styles.segmentActive : ''}`}
+            onClick={() => setWidgetScale(s.value)}>
+            {s.label}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function WidgetActiveSection() {
+  const { visibleWidgets, toggleWidget } = useTheme();
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardLabel}>Active Widgets</div>
+      <div className={styles.widgetToggles}>
+        {[
+          { key: 'system', label: 'System', desc: 'CPU, Memory, GPU, Temp' },
+          { key: 'network', label: 'Network', desc: 'Download, Upload, IP' },
+          { key: 'disk', label: 'Disk Health', desc: 'RAID, Storage usage' },
+          { key: 'notifications', label: 'Notifications', desc: 'System alerts' },
+        ].map(w => (
+          <div key={w.key} className={styles.widgetToggleRow}>
+            <div>
+              <div className={styles.widgetToggleName}>{w.label}</div>
+              <div className={styles.widgetToggleDesc}>{w.desc}</div>
+            </div>
+            <Toggle on={visibleWidgets[w.key]} onChange={() => toggleWidget(w.key)} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════
+// Composed Pages (used by Settings standalone)
+// ═══════════════════════════════════
+
+function AppearancePage() {
+  return (
+    <>
+      <h3 className={styles.pageTitle}>Appearance</h3>
+      <PerformanceSection />
+      <ThemeSection />
+      <AccentSection />
+      <GlowSection />
     </>
   );
 }
 
 function DesktopPage() {
-  const { showDesktopIcons, autoHideTaskbar, clock24, taskbarPosition,
-          wallpaper, textScale, taskbarSize,
-          setShowDesktopIcons, setAutoHideTaskbar, setClock24, setTaskbarPosition,
-          setWallpaper, setTextScale, setTaskbarSize } = useTheme();
-  const { token } = useAuth();
-
-  const TEXT_SIZES = [
-    { value: 80, label: 'XS' },
-    { value: 90, label: 'S' },
-    { value: 100, label: 'M' },
-    { value: 110, label: 'L' },
-    { value: 120, label: 'XL' },
-  ];
-
   return (
     <>
       <h3 className={styles.pageTitle}>Desktop</h3>
-      <div className={styles.card}>
-        <div className={styles.cardLabel}>Icons</div>
-        <div className={styles.toggleGrid}>
-          <div className={styles.toggleRow}>
-            <span>Show desktop icons</span>
-            <Toggle on={showDesktopIcons} onChange={() => setShowDesktopIcons(!showDesktopIcons)} />
-          </div>
-        </div>
-      </div>
-      
-      <div className={styles.card}>
-        <div className={styles.cardLabel}>Dock</div>
-        <div className={styles.toggleGrid}>
-          <div className={styles.toggleRow}>
-            <span>Auto-hide dock</span>
-            <Toggle on={autoHideTaskbar} onChange={() => setAutoHideTaskbar(!autoHideTaskbar)} />
-          </div>
-          <div className={styles.toggleRow}>
-            <span>24-hour clock</span>
-            <Toggle on={clock24} onChange={() => setClock24(!clock24)} />
-          </div>
-          <div className={styles.toggleRow}>
-            <span>Position</span>
-            <div className={styles.segmentedControlSmall}>
-              <div
-                className={`${styles.segmentSmall} ${taskbarPosition === 'bottom' ? styles.segmentSmallActive : ''}`}
-                onClick={() => setTaskbarPosition('bottom')}
-              >
-                Bottom
-              </div>
-              <div
-                className={`${styles.segmentSmall} ${taskbarPosition === 'left' ? styles.segmentSmallActive : ''}`}
-                onClick={() => setTaskbarPosition('left')}
-              >
-                Left
-              </div>
-            </div>
-          </div>
-          <div className={styles.toggleRow}>
-            <span>Size</span>
-            <div className={styles.segmentedControlSmall}>
-              <div
-                className={`${styles.segmentSmall} ${taskbarSize === 'small' ? styles.segmentSmallActive : ''}`}
-                onClick={() => setTaskbarSize('small')}
-              >
-                S
-              </div>
-              <div
-                className={`${styles.segmentSmall} ${taskbarSize === 'medium' ? styles.segmentSmallActive : ''}`}
-                onClick={() => setTaskbarSize('medium')}
-              >
-                M
-              </div>
-              <div
-                className={`${styles.segmentSmall} ${taskbarSize === 'large' ? styles.segmentSmallActive : ''}`}
-                onClick={() => setTaskbarSize('large')}
-              >
-                L
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className={styles.card}>
-        <div className={styles.cardLabel}>Wallpaper</div>
-        <div className={styles.wallpaperRow}>
-          <div className={styles.wallpaperControls}>
-            <div
-              className={`${styles.wallpaperItem} ${!wallpaper ? styles.wallpaperSelected : ''}`}
-              onClick={() => setWallpaper('')}
-            >
-              <div className={styles.wallpaperNone}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </div>
-              <span>None</span>
-            </div>
-            <label className={styles.wallpaperUpload}>
-              <input
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = async (ev) => {
-                    const dataUrl = ev.target.result;
-                    // Show preview immediately (local only, don't save data URL to server)
-                    setWallpaper(dataUrl, true);
-                    // Upload to server
-                    try {
-                      const res = await fetch('/api/user/wallpaper', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify({ data: dataUrl, filename: file.name })
-                      });
-                      const result = await res.json();
-                      if (result.url) {
-                        // Replace data URL with server URL + cache bust
-                        setWallpaper(result.url + '?t=' + Date.now());
-                      }
-                    } catch (err) {
-                      console.error('[Wallpaper] Upload failed:', err.message);
-                    }
-                  };
-                  reader.readAsDataURL(file);
-                  e.target.value = '';
-                }}
-              />
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
-              Upload
-            </label>
-          </div>
-          {wallpaper && (
-            <div className={styles.wallpaperPreviewLarge}>
-              <img src={wallpaper} alt="Current wallpaper" />
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className={styles.card}>
-        <div className={styles.cardLabel}>Text Size</div>
-        <div className={styles.sliderSection}>
-          <div className={styles.sliderLabel}>
-            <span style={{ fontSize: 11 }}>A</span>
-            <span style={{ fontSize: 18, fontWeight: 500 }}>A</span>
-          </div>
-          <div className={styles.sizeSteps}>
-            {TEXT_SIZES.map(s => (
-              <div
-                key={s.value}
-                className={`${styles.sizeStep} ${textScale === s.value ? styles.sizeStepActive : ''}`}
-                onClick={() => setTextScale(s.value)}
-              >
-                <div className={styles.sizeStepDot} />
-                <span>{s.label}</span>
-              </div>
-            ))}
-          </div>
-          <div className={styles.sliderHint}>{textScale}% — {textScale === 100 ? 'Default' : textScale < 100 ? 'Compact' : 'Large'}</div>
-        </div>
-      </div>
+      <IconsSection />
+      <DockSection />
+      <WallpaperSection />
+      <TextSizeSection />
     </>
   );
 }
 
 function WidgetsPage() {
-  const { showWidgets, widgetScale, visibleWidgets,
-          setShowWidgets, setWidgetScale, toggleWidget } = useTheme();
-
   return (
     <>
       <h3 className={styles.pageTitle}>Widgets</h3>
-      <div className={styles.card}>
-        <div className={styles.cardLabel}>General</div>
-        <div className={styles.toggleGrid}>
-          <div className={styles.toggleRow}>
-            <span>Show widgets panel</span>
-            <Toggle on={showWidgets} onChange={() => setShowWidgets(!showWidgets)} />
-          </div>
-        </div>
-      </div>
-      
-      <div className={styles.card}>
-        <div className={styles.cardLabel}>Size</div>
-        <div className={styles.segmentedControl}>
-          {[
-            { value: 80, label: 'Small' },
-            { value: 100, label: 'Medium' },
-            { value: 120, label: 'Large' },
-          ].map(s => (
-            <div
-              key={s.value}
-              className={`${styles.segment} ${widgetScale === s.value ? styles.segmentActive : ''}`}
-              onClick={() => setWidgetScale(s.value)}
-            >
-              {s.label}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className={styles.card}>
-        <div className={styles.cardLabel}>Active Widgets</div>
-        <div className={styles.widgetToggles}>
-          {[
-            { key: 'system', label: 'System', desc: 'CPU, Memory, GPU, Temp' },
-            { key: 'network', label: 'Network', desc: 'Download, Upload, IP' },
-            { key: 'disk', label: 'Disk Health', desc: 'RAID, Storage usage' },
-            { key: 'notifications', label: 'Notifications', desc: 'System alerts' },
-          ].map(w => (
-            <div key={w.key} className={styles.widgetToggleRow}>
-              <div>
-                <div className={styles.widgetToggleName}>{w.label}</div>
-                <div className={styles.widgetToggleDesc}>{w.desc}</div>
-              </div>
-              <Toggle on={visibleWidgets[w.key]} onChange={() => toggleWidget(w.key)} />
-            </div>
-          ))}
-        </div>
-      </div>
+      <WidgetGeneralSection />
+      <WidgetScaleSection />
+      <WidgetActiveSection />
     </>
   );
 }
@@ -878,7 +880,14 @@ function HardwarePage() {
 }
 
 // Named exports for SettingsHub integration
+// Full pages
 export { AppearancePage, DesktopPage, WidgetsPage, HardwarePage, LanguagePage, NotificationsPage, AboutPage };
+// Sub-components (individual sections)
+export {
+  PerformanceSection, ThemeSection, AccentSection, GlowSection,
+  IconsSection, DockSection, WallpaperSection, TextSizeSection,
+  WidgetGeneralSection, WidgetScaleSection, WidgetActiveSection,
+};
 
 export default function Settings() {
   const [page, setPage] = useState('appearance');
