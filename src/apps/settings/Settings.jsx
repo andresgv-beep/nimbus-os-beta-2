@@ -877,6 +877,9 @@ function HardwarePage() {
   );
 }
 
+// Named exports for SettingsHub integration
+export { AppearancePage, DesktopPage, WidgetsPage, HardwarePage, LanguagePage, NotificationsPage, AboutPage };
+
 export default function Settings() {
   const [page, setPage] = useState('appearance');
 
