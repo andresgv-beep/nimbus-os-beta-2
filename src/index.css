@@ -3,7 +3,7 @@
    Reset + base + utilities
    ═══════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Ubuntu+Mono:wght@400;700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@200,300,400,500,600,700&display=swap');
 
 @import './theme/tokens.css';
 @import './theme/dark.css';
