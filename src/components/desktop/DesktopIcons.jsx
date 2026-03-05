@@ -4,7 +4,7 @@ import { APP_REGISTRY, getAppMeta } from '@/apps';
 import Icon from '@icons';
 import styles from './DesktopIcons.module.css';
 
-const DESKTOP_APPS = ['files', 'storage', 'monitor', 'containers', 'network', 'vms', 'terminal', 'texteditor', 'mediaplayer', 'controlpanel', 'appstore', 'settings'];
+const DESKTOP_APPS = ['files', 'storage', 'monitor', 'containers', 'network', 'vms', 'terminal', 'texteditor', 'mediaplayer', 'nimsettings', 'appstore'];
 
 export default function DesktopIcons() {
   const { openWindow } = useWindows();

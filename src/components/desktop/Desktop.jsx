@@ -36,7 +36,7 @@ export default function Desktop() {
       { label: 'Terminal', icon: <Icon name="terminal" size={16} />, action: () => openWindow('terminal', { width: 700, height: 450 }) },
       { label: 'System Monitor', icon: <Icon name="activity" size={16} />, action: () => openWindow('monitor', { width: 820, height: 520 }) },
       { divider: true },
-      { label: 'Settings', icon: <Icon name="settings" size={16} />, action: () => openWindow('settings', { width: 750, height: 520 }), shortcut: '' },
+      { label: 'NimSettings', icon: <Icon name="settings" size={16} />, action: () => openWindow('nimsettings', { width: 960, height: 640 }), shortcut: '' },
       { label: 'Change Wallpaper', icon: <Icon name="star" size={16} /> },
       { divider: true },
       { label: 'About NimbusOS v0.1.0', icon: <Icon name="check" size={16} /> },
