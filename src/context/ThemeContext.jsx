@@ -497,10 +497,10 @@ export function ThemeProvider({ children }) {
     });
   }, [savePrefsToServer]);
 
-  const applyWallpaper = useCallback((url) => {
+  const applyWallpaper = useCallback((url, localOnly = false) => {
     setWallpaperState(url);
     try { if (url) localStorage.setItem('nimbus-wallpaper', url); else localStorage.removeItem('nimbus-wallpaper'); } catch {}
-    savePrefsToServer({ wallpaper: url || '' });
+    if (!localOnly) savePrefsToServer({ wallpaper: url || '' });
   }, [savePrefsToServer]);
   
   // Setters that also save to server
