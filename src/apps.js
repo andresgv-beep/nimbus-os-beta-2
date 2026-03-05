@@ -7,7 +7,6 @@ import dockerIcon from '@icons/apps/docker.png';
 import networkIcon from '@icons/apps/network.png';
 import terminalIcon from '@icons/apps/terminal.png';
 import settingsIcon from '@icons/apps/settings.png';
-import controlpanelIcon from '@icons/apps/controlpanel.png';
 import filesIcon from '@icons/apps/files.png';
 import storageIcon from '@icons/apps/storage.png';
 import monitorIcon from '@icons/apps/monitor.png';
@@ -80,13 +79,13 @@ export const APP_REGISTRY = {
     defaultSize: { width: 720, height: 460 },
     category: 'system',
   },
-  settings: {
-    id: 'settings',
-    title: 'Settings',
-    color: '#78706A',
+  nimsettings: {
+    id: 'nimsettings',
+    title: 'NimSettings',
+    color: '#4A5568',
     icon: 'settings',
     appIcon: settingsIcon,
-    defaultSize: { width: 780, height: 560 },
+    defaultSize: { width: 960, height: 640 },
     category: 'system',
   },
   vms: {
@@ -114,24 +113,6 @@ export const APP_REGISTRY = {
     icon: 'play',
     appIcon: mediaplayerIcon,
     defaultSize: { width: 880, height: 560 },
-    category: 'system',
-  },
-  controlpanel: {
-    id: 'controlpanel',
-    title: 'Control Panel',
-    color: '#78706A',
-    icon: 'shield',
-    appIcon: controlpanelIcon,
-    defaultSize: { width: 900, height: 600 },
-    category: 'system',
-  },
-  nimsettings: {
-    id: 'nimsettings',
-    title: 'NimSettings',
-    color: '#4A5568',
-    icon: 'settings',
-    appIcon: null,
-    defaultSize: { width: 960, height: 600 },
     category: 'system',
   },
   appstore: {
