@@ -26,6 +26,10 @@ import {
   StorageSmartView, StorageCreateView, StorageRestoreView,
 } from '../storage/StorageManager.jsx';
 
+// ─── Control Panel imports ───
+import { UsersPage, SharedFoldersPage, AppPermissionsPage, UpdatesPage, LoginSettingsPage } from '../controlpanel/ControlPanel.jsx';
+import PortalPage from '../controlpanel/PortalPage.jsx';
+
 // ═══════════════════════════════════
 // Navigation categories
 // ═══════════════════════════════════
@@ -67,26 +71,11 @@ const GRID = {
     { id: 'updates', label: 'Updates', icon: Hub.HubUpdatesIcon },
     { id: 'power', label: 'Power', icon: Hub.HubPowerIcon },
   ],
-  storage: [
-    { id: 'disks', label: 'Disks', icon: Hub.HubDisksIcon, title: 'Storage' },
-    { id: 'pools', label: 'Pools & RAID', icon: Hub.HubPoolsIcon },
-    { id: 'health', label: 'Health', icon: Hub.HubHealthIcon },
-  ],
-  network: [
-    { id: 'interfaces', label: 'Interfaces', icon: Hub.HubInterfacesIcon, title: 'Network & Services' },
-    { id: 'remote-access', label: 'Remote Access', icon: Hub.HubRemoteAccessIcon },
-    { id: 'ddns', label: 'DDNS', icon: Hub.HubDdnsIcon },
-    { id: 'reverse-proxy', label: 'Reverse Proxy', icon: Hub.HubReverseProxyIcon },
-    { id: 'smb', label: 'SMB / CIFS', icon: Hub.HubSmbIcon },
-    { id: 'ssh', label: 'SSH', icon: Hub.HubSshIcon },
-    { id: 'ftp', label: 'FTP / SFTP', icon: Hub.HubFtpIcon },
-    { id: 'nfs', label: 'NFS', icon: Hub.HubNfsIcon },
-    { id: 'webdav', label: 'WebDAV', icon: Hub.HubWebDavIcon },
-  ],
+  // storage and network categories open sections directly (no grid)
+  network: [],
+  storage: [],
   security: [
-    { id: 'firewall', label: 'Firewall', icon: Hub.HubFirewallIcon, title: 'Security' },
-    { id: 'certificates', label: 'Certificates', icon: Hub.HubCertificatesIcon },
-    { id: '2fa', label: '2FA / Login', icon: Hub.HubLockIcon },
+    { id: '2fa', label: '2FA / Login', icon: Hub.HubLockIcon, title: 'Security' },
     { id: 'sessions', label: 'Sessions', icon: Hub.HubSessionsIcon },
     { id: 'backup', label: 'Backup', icon: Hub.HubBackupIcon },
     { id: 'logs', label: 'Logs', icon: Hub.HubLogsIcon },
@@ -123,32 +112,15 @@ const SECTION_SIDEBAR = {
     { label: 'FTP / SFTP' }, { label: 'SSH' }, { label: 'NFS' }, { label: 'WebDAV' },
     { label: 'Firewall', section: 'Security' }, { label: 'Fail2ban' },
   ]},
-  'users':         { label: 'Users', items: ['All Users', 'Create User', 'Permissions'] },
-  'portal':        { label: 'Portal', items: ['Web Portal', 'Ports', 'Service Control'] },
+  'users':         { label: 'Users & Permissions', items: ['User Accounts', 'Shared Folders', 'App Permissions'] },
+  'portal':        { label: 'Portal', items: ['Web Portal'] },
   'monitor':       { label: 'System Monitor', items: ['Overview', 'CPU', 'Memory', 'GPU', 'Processes'] },
-  'updates':       { label: 'Updates', items: ['Check Updates', 'Update Log'] },
+  'updates':       { label: 'Updates', items: ['System Updates'] },
   'power':         { label: 'Power', items: ['Restart Service', 'Reboot System', 'Shutdown'] },
-  'disks':         { label: 'Disks', items: ['Physical Disks', 'SMART Health'] },
-  'pools':         { label: 'Pools & RAID', grouped: true, items: [
-    { label: 'Pools', section: 'Storage' },
-    { label: 'Create Pool', section: 'Actions' }, { label: 'Restore Pool' },
-  ]},
-  'health':        { label: 'Health', items: ['SMART Health'] },
-  'interfaces':    { label: 'Interfaces', items: ['Overview'] },
-  'remote-access': { label: 'Remote Access', items: ['Configuration'] },
-  'ddns':          { label: 'DDNS', items: ['Configuration'] },
-  'reverse-proxy': { label: 'Reverse Proxy', items: ['Rules'] },
-  'smb':           { label: 'SMB / CIFS', items: ['Configuration'] },
-  'ssh':           { label: 'SSH', items: ['Configuration'] },
-  'ftp':           { label: 'FTP / SFTP', items: ['Configuration'] },
-  'nfs':           { label: 'NFS', items: ['Configuration'] },
-  'webdav':        { label: 'WebDAV', items: ['Configuration'] },
-  'firewall':      { label: 'Firewall', items: ['Rules'] },
-  'certificates':  { label: 'Certificates', items: ['Management'] },
-  '2fa':           { label: '2FA / Login', items: ['Two-Factor Auth', 'Login Settings', 'Password Policy'] },
-  'sessions':      { label: 'Sessions', items: ['Active Sessions', 'History'] },
-  'backup':        { label: 'Backup', items: ['Create Backup', 'Restore', 'Schedule'] },
-  'logs':          { label: 'Logs', items: ['System Log', 'Access Log', 'Update Log'] },
+  '2fa':           { label: '2FA / Login', items: ['Login Settings'] },
+  'sessions':      { label: 'Sessions', items: ['Active Sessions'] },
+  'backup':        { label: 'Backup', items: ['Backup & Restore'] },
+  'logs':          { label: 'Logs', items: ['System Log'] },
   'theme':         { label: 'Appearance', items: ['Theme', 'Accent Color', 'Performance', 'Window Glow'] },
   'wallpaper':     { label: 'Desktop', items: ['Wallpaper', 'Icons', 'Dock', 'Text Size'] },
   'taskbar':       { label: 'Taskbar', items: ['Position', 'Size', 'Auto-hide', 'Pinned Apps'] },
@@ -204,19 +176,6 @@ const SECTION_COMPONENTS = {
     'Fail2ban':      Fail2banPage,
   },
 
-  // ─── Network (individual grid items) ───
-  'interfaces':    { 'Overview':      InterfacesPage },
-  'remote-access': { 'Configuration': RemoteAccessPanel },
-  'ddns':          { 'Configuration': DDNSPage },
-  'reverse-proxy': { 'Rules':         ProxyPanel },
-  'smb':           { 'Configuration': SmbPanel },
-  'ssh':           { 'Configuration': SshPanel },
-  'ftp':           { 'Configuration': FtpPanel },
-  'nfs':           { 'Configuration': NfsPanel },
-  'webdav':        { 'Configuration': WebDavPanel },
-  'firewall':      { 'Rules':         FirewallPage },
-  'certificates':  { 'Management':    CertsPanel },
-
   // ─── Storage (unified sidebar) ───
   'storage-mgr': {
     'Overview':       StorageOverviewView,
@@ -227,10 +186,15 @@ const SECTION_COMPONENTS = {
     'Restore Pool':   StorageRestoreView,
   },
 
-  // ─── Storage (individual grid items) ───
-  'disks':  { 'Physical Disks': StorageDisksView, 'SMART Health': StorageSmartView },
-  'pools':  { 'Pools': StoragePoolsView, 'Create Pool': StorageCreateView, 'Restore Pool': StorageRestoreView },
-  'health': { 'SMART Health': StorageSmartView },
+  // ─── Control Panel ───
+  'users': {
+    'User Accounts':   UsersPage,
+    'Shared Folders':  SharedFoldersPage,
+    'App Permissions': AppPermissionsPage,
+  },
+  'portal':  { 'Web Portal':      PortalPage },
+  'updates': { 'System Updates':   UpdatesPage },
+  '2fa':     { 'Login Settings':   LoginSettingsPage },
 };
 
 // ═══════════════════════════════════
@@ -238,7 +202,7 @@ const SECTION_COMPONENTS = {
 // Lives outside SettingsHub so provider doesn't re-mount on sidebar item change
 // ═══════════════════════════════════
 
-const PROVIDER_SECTIONS = { 'storage-mgr': StorageProvider, 'disks': StorageProvider, 'pools': StorageProvider, 'health': StorageProvider };
+const PROVIDER_SECTIONS = { 'storage-mgr': StorageProvider };
 
 function SectionRendererInner({ section, sidebarItem, sectionDef }) {
   const sectionMap = SECTION_COMPONENTS[section];
@@ -289,12 +253,30 @@ export default function SettingsHub() {
     ? (sectionDef.grouped ? sectionDef.items : (sectionDef.items || []).map(label => ({ label })))
     : [];
 
+// Categories that skip the grid and open a section directly
+const DIRECT_SECTION_MAP = {
+  'storage': 'storage-mgr',
+  'network': 'network-mgr',
+};
+
   // Select nav category
   const selectCategory = useCallback((id) => {
     if (section) { setSection(null); setSidebarItem(null); }
     setCategory(id);
     setSearch('');
-  }, [section]);
+
+    // Some categories open a section directly (no grid)
+    const directSection = DIRECT_SECTION_MAP[id];
+    if (directSection) {
+      const def = SECTION_SIDEBAR[directSection];
+      const firstItem = def?.grouped ? def.items[0]?.label : (def?.items?.[0] || null);
+      setTimeout(() => {
+        setSection(directSection);
+        setSidebarItem(firstItem);
+        requestAnimationFrame(() => contentRef.current?.classList.add(styles.contentRevealed));
+      }, perf === 'performance' ? 0 : 50);
+    }
+  }, [section, perf]);
 
   // Open section from grid
   const openSection = useCallback((id) => {
