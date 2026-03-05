@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { HardDriveIcon, ShieldIcon, ActivityIcon, PlusIcon, RefreshCwIcon, AlertTriangleIcon, CheckCircleIcon, XCircleIcon, DownloadIcon } from '@icons';
 import { useAuth } from '@context';
 import styles from './StorageManager.module.css';
@@ -12,9 +12,21 @@ function formatBytes(bytes) {
   return (bytes / Math.pow(1024, i)).toFixed(i > 1 ? 1 : 0) + ' ' + units[i];
 }
 
-export default function StorageManager() {
+// ═══════════════════════════════════
+// Shared storage hook — single source of truth
+// ═══════════════════════════════════
+
+const StorageContext = React.createContext(null);
+
+export function useStorageData() {
+  const ctx = React.useContext(StorageContext);
+  if (ctx) return ctx; // inside provider, use shared state
+  // fallback: standalone usage (creates own state)
+  return useStorageDataInternal();
+}
+
+function useStorageDataInternal() {
   const { token } = useAuth();
-  const [view, setView] = useState('overview');
   const [disks, setDisks] = useState(null);
   const [pools, setPools] = useState(null);
   const [alerts, setAlerts] = useState([]);
@@ -46,12 +58,67 @@ export default function StorageManager() {
 
   const rescan = async () => { setLoading(true); await fetch(`${API}/api/storage/scan`, { method: 'POST', headers }); await fetchData(); };
 
-  if (loading && !disks) return <div className={styles.layout}><div className={styles.main}><div style={{ padding: 40, color: 'var(--text-muted)' }}>Loading storage data...</div></div></div>;
-
-  const hasPools = pools && pools.length > 0;
   const allDisks = disks ? [...(disks.eligible||[]), ...(disks.provisioned||[]), ...(disks.nvme||[]), ...(disks.usb||[])] : [];
+  const hasPools = pools && pools.length > 0;
+
+  return { token, disks, pools, allDisks, alerts, loading, error, hasPools, fetchData, rescan };
+}
+
+// Provider — wrap around multiple storage views to share one fetch
+export function StorageProvider({ children }) {
+  const data = useStorageDataInternal();
+  return <StorageContext.Provider value={data}>{children}</StorageContext.Provider>;
+}
+
+// ═══════════════════════════════════
+// Exported view components for SettingsHub
+// Each uses the shared hook (via provider or standalone)
+// ═══════════════════════════════════
+
+export function StorageOverviewView() {
+  const { pools, allDisks, hasPools, disks, loading } = useStorageData();
+  if (loading && !disks) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>Loading storage data...</div>;
+  if (!hasPools) return <NoPools eligible={(disks?.eligible||[]).length} />;
+  return <OverviewPage pools={pools} allDisks={allDisks} />;
+}
+
+export function StorageDisksView() {
+  const { disks, allDisks, token, fetchData, loading } = useStorageData();
+  if (loading && !disks) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>Loading storage data...</div>;
+  return <DisksPage disks={disks} allDisks={allDisks} token={token} onRefresh={fetchData} />;
+}
+
+export function StoragePoolsView() {
+  const { pools, token, fetchData, loading, disks } = useStorageData();
+  if (loading && !disks) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>Loading storage data...</div>;
+  return <PoolsPage pools={pools} token={token} onRefresh={fetchData} />;
+}
+
+export function StorageSmartView() {
+  const { allDisks, loading, disks } = useStorageData();
+  if (loading && !disks) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>Loading storage data...</div>;
+  return <SmartPage allDisks={allDisks} />;
+}
+
+export function StorageCreateView() {
+  const { disks, token, fetchData, loading } = useStorageData();
+  if (loading && !disks) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>Loading storage data...</div>;
+  return <CreatePoolPage disks={disks} token={token} onCreated={fetchData} />;
+}
+
+export function StorageRestoreView() {
+  const { token, fetchData } = useStorageData();
+  return <RestorePoolPage token={token} onRestored={fetchData} />;
+}
+
+export default function StorageManager() {
+  const { token, disks, pools, allDisks, alerts, loading, error, hasPools, fetchData, rescan } = useStorageDataInternal();
+  const [view, setView] = useState('overview');
+
   const critAlerts = alerts.filter(a => a.severity === 'critical');
   const warnAlerts = alerts.filter(a => a.severity === 'warning');
+
+  if (loading && !disks) return <div className={styles.layout}><div className={styles.main}><div style={{ padding: 40, color: 'var(--text-muted)' }}>Loading storage data...</div></div></div>;
 
   return (
     <div className={styles.layout}>
