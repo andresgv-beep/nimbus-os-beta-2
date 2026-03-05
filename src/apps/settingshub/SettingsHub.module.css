@@ -22,6 +22,9 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  /* Sube por encima del bg-window para que su fondo cubra la zona del header */
+  position: relative;
+  z-index: 3;
 }
 
 /* ─── Profile ─── */
