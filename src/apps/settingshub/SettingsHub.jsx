@@ -5,7 +5,14 @@ import * as Hub from '@icons/hub/index.jsx';
 import styles from './SettingsHub.module.css';
 
 // ─── Settings page imports ───
-import { AppearancePage, DesktopPage, WidgetsPage, HardwarePage, LanguagePage, NotificationsPage, AboutPage } from '../settings/Settings.jsx';
+import {
+  // Sub-components for granular sidebar mapping
+  PerformanceSection, ThemeSection, AccentSection, GlowSection,
+  IconsSection, DockSection, WallpaperSection, TextSizeSection,
+  WidgetGeneralSection, WidgetScaleSection, WidgetActiveSection,
+  // Full pages (for sections not yet split)
+  HardwarePage, LanguagePage, NotificationsPage, AboutPage,
+} from '../settings/Settings.jsx';
 
 // ═══════════════════════════════════
 // Navigation categories
@@ -123,29 +130,42 @@ const SECTION_SIDEBAR = {
   'sessions':      { label: 'Sessions', items: ['Active Sessions', 'History'] },
   'backup':        { label: 'Backup', items: ['Create Backup', 'Restore', 'Schedule'] },
   'logs':          { label: 'Logs', items: ['System Log', 'Access Log', 'Update Log'] },
-  'theme':         { label: 'Appearance', items: ['Theme & Colors', 'Performance', 'Window Glow'] },
+  'theme':         { label: 'Appearance', items: ['Theme', 'Accent Color', 'Performance', 'Window Glow'] },
   'wallpaper':     { label: 'Desktop', items: ['Wallpaper', 'Icons', 'Dock', 'Text Size'] },
   'taskbar':       { label: 'Taskbar', items: ['Position', 'Size', 'Auto-hide', 'Pinned Apps'] },
-  'widgets':       { label: 'Widgets', items: ['Visible Widgets', 'Scale'] },
-  'sysinfo':       { label: 'About', items: ['System Info', 'Hardware', 'Language'] },
+  'widgets':       { label: 'Widgets', items: ['General', 'Scale', 'Active Widgets'] },
+  'sysinfo':       { label: 'About', items: ['System Info'] },
   'license':       { label: 'License', items: ['NimbusOS License'] },
 };
 
 // ═══════════════════════════════════
 // Component Registry
-// Maps section IDs → React components
-// Sections not listed here render the placeholder
+// Maps section ID + sidebar item → React component
+// Sections/items not listed render the placeholder
 // ═══════════════════════════════════
 
 const SECTION_COMPONENTS = {
-  'theme':     AppearancePage,
-  'wallpaper': DesktopPage,
-  'widgets':   WidgetsPage,
-  'sysinfo':   AboutPage,
+  'theme': {
+    'Theme':        ThemeSection,
+    'Accent Color': AccentSection,
+    'Performance':  PerformanceSection,
+    'Window Glow':  GlowSection,
+  },
+  'wallpaper': {
+    'Wallpaper':  WallpaperSection,
+    'Icons':      IconsSection,
+    'Dock':       DockSection,
+    'Text Size':  TextSizeSection,
+  },
+  'widgets': {
+    'General':        WidgetGeneralSection,
+    'Scale':          WidgetScaleSection,
+    'Active Widgets': WidgetActiveSection,
+  },
+  'sysinfo': {
+    'System Info': AboutPage,
+  },
 };
-
-// Standalone page (no sidebar sub-items, render directly)
-const STANDALONE_SECTIONS = new Set(['theme', 'wallpaper', 'widgets', 'sysinfo']);
 
 // ═══════════════════════════════════
 // Component
@@ -304,7 +324,8 @@ export default function SettingsHub() {
               ref={contentRef}
             >
               {(() => {
-                const SectionComp = SECTION_COMPONENTS[section];
+                const sectionMap = SECTION_COMPONENTS[section];
+                const SectionComp = sectionMap?.[sidebarItem];
                 if (SectionComp) {
                   return <SectionComp />;
                 }
