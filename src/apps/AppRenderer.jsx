@@ -5,7 +5,6 @@ import SystemMonitor from './monitor/SystemMonitor';
 import Containers from './containers/Containers';
 import Network from './network/Network';
 import Terminal from './terminal/Terminal';
-import Settings from './settings/Settings';
 import VirtualMachines from './vms/VirtualMachines';
 import ControlPanel from './controlpanel/ControlPanel';
 import TextEditor from './texteditor/TextEditor';
@@ -26,7 +25,6 @@ const APP_COMPONENTS = {
   containers: Containers,
   network: Network,
   terminal: Terminal,
-  settings: Settings,
   vms: VirtualMachines,
   controlpanel: ControlPanel,
   nimsettings: SettingsHub,
