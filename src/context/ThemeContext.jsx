@@ -34,7 +34,7 @@ const DEFAULT_PREFS = {
   showWidgets: true,
   widgetScale: 100,
   visibleWidgets: { system: true, network: true, disk: true, notifications: true },
-  pinnedApps: ['files', 'appstore', 'settings'],
+  pinnedApps: ['files', 'appstore', 'nimsettings'],
 };
 
 // Get token from localStorage
