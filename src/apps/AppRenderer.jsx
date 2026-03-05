@@ -12,6 +12,7 @@ import TextEditor from './texteditor/TextEditor';
 import MediaPlayer from './mediaplayer/MediaPlayer';
 import AppStore from './appstore/AppStore';
 import DownloadStation from './downloads/DownloadStation';
+import SettingsHub from './settingshub/SettingsHub';
 import AppPlaceholder from './AppPlaceholder';
 import WebApp from './webapp/WebApp';
 import { useAuth } from '@context';
@@ -28,6 +29,7 @@ const APP_COMPONENTS = {
   settings: Settings,
   vms: VirtualMachines,
   controlpanel: ControlPanel,
+  nimsettings: SettingsHub,
   texteditor: TextEditor,
   mediaplayer: MediaPlayer,
   appstore: AppStore,
