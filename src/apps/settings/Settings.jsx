@@ -415,8 +415,8 @@ function DesktopPage() {
                   const reader = new FileReader();
                   reader.onload = async (ev) => {
                     const dataUrl = ev.target.result;
-                    // Show preview immediately
-                    setWallpaper(dataUrl);
+                    // Show preview immediately (local only, don't save data URL to server)
+                    setWallpaper(dataUrl, true);
                     // Upload to server
                     try {
                       const res = await fetch('/api/user/wallpaper', {
@@ -426,8 +426,8 @@ function DesktopPage() {
                       });
                       const result = await res.json();
                       if (result.url) {
-                        // Replace data URL with server URL
-                        setWallpaper(result.url);
+                        // Replace data URL with server URL + cache bust
+                        setWallpaper(result.url + '?t=' + Date.now());
                       }
                     } catch (err) {
                       console.error('[Wallpaper] Upload failed:', err.message);
