@@ -5,7 +5,8 @@
 
 .layout {
   display: flex;
-  height: 100%;
+  height: calc(100% + var(--window-header-height));
+  margin-top: calc(-1 * var(--window-header-height));
   overflow: hidden;
 }
 
@@ -17,14 +18,10 @@
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid var(--border);
   padding: calc(var(--window-header-height) + var(--space-3)) 0 var(--space-3) 0;
-  margin-top: calc(-1 * var(--window-header-height));
   overflow-y: auto;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  /* Sube por encima del bg-window para que su fondo cubra la zona del header */
-  position: relative;
-  z-index: 3;
 }
 
 /* ─── Profile ─── */
@@ -204,6 +201,7 @@
   flex: 1;
   overflow-y: auto;
   position: relative;
+  padding-top: var(--window-header-height);
 }
 
 /* ─── Glass overlay ─── */
