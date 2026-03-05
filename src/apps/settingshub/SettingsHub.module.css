@@ -19,6 +19,8 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  margin-top: calc(-1 * var(--window-header-height));
+  padding-top: var(--window-header-height);
 }
 
 /* ─── Profile ─── */
