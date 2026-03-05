@@ -96,8 +96,8 @@ const GRID = {
   ],
   appearance: [
     { id: 'theme', label: 'Theme', icon: Hub.HubAppearanceIcon, title: 'Appearance' },
+    { id: 'desktop', label: 'Desktop', icon: Hub.HubMonitorIcon },
     { id: 'wallpaper', label: 'Wallpaper', icon: Hub.HubPortalIcon },
-    { id: 'taskbar', label: 'Taskbar', icon: Hub.HubMonitorIcon },
     { id: 'widgets', label: 'Widgets', icon: Hub.HubContainersIcon },
   ],
   about: [
@@ -152,8 +152,8 @@ const SECTION_SIDEBAR = {
   'nfs':           { label: 'NFS', items: ['Configuration'] },
   'webdav':        { label: 'WebDAV', items: ['Configuration'] },
   'theme':         { label: 'Appearance', items: ['Theme', 'Accent Color', 'Performance', 'Window Glow'] },
-  'wallpaper':     { label: 'Desktop', items: ['Wallpaper', 'Icons', 'Dock', 'Text Size'] },
-  'taskbar':       { label: 'Taskbar', items: ['Position', 'Size', 'Auto-hide', 'Pinned Apps'] },
+  'desktop':       { label: 'Desktop', items: ['Icons', 'Dock', 'Text Size'] },
+  'wallpaper':     { label: 'Wallpaper', items: ['Wallpaper'] },
   'widgets':       { label: 'Widgets', items: ['General', 'Scale', 'Active Widgets'] },
   'sysinfo':       { label: 'About', items: ['System Info'] },
   'license':       { label: 'License', items: ['NimbusOS License'] },
@@ -175,6 +175,8 @@ const SECTION_COMPONENTS = {
   },
   'wallpaper': {
     'Wallpaper':  WallpaperSection,
+  },
+  'desktop': {
     'Icons':      IconsSection,
     'Dock':       DockSection,
     'Text Size':  TextSizeSection,
