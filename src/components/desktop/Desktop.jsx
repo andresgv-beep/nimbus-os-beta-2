@@ -6,6 +6,7 @@ import Taskbar from '@components/window/Taskbar';
 import WindowFrame from '@components/window/WindowFrame';
 import DesktopIcons from './DesktopIcons';
 import WidgetPanel from './WidgetPanel';
+import DynamicWidgets from '../widgets/DynamicWidgets';
 import Icon from '@icons';
 import styles from './Desktop.module.css';
 
@@ -66,6 +67,7 @@ export default function Desktop() {
 
       {showDesktopIcons && <DesktopIcons />}
 
+      <DynamicWidgets />
       <WidgetPanel />
 
       {Object.values(windows).map(win => (
