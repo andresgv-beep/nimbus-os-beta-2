@@ -100,6 +100,11 @@
   --sidebar-width: 216px;
   --widget-panel-width: 300px;
   --window-header-height: 40px;
+
+  /* ─── Dynamic Widgets ─── */
+  --widget-cell: 160px;
+  --widget-gap: 12px;
+  --widget-columns: 4;
 }
 
 /* ─── Performance: reduce effects on low-end hardware ─── */

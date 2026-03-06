@@ -36,4 +36,8 @@
   --scrollbar-track: transparent;
   --scrollbar-thumb: rgba(0, 0, 0, 0.10);
   --scrollbar-thumb-hover: rgba(0, 0, 0, 0.18);
+
+  /* ─── Dynamic Widgets ─── */
+  --bg-widget: rgba(255, 255, 255, 0.78);
+  --widget-border: rgba(0, 0, 0, 0.10);
 }
