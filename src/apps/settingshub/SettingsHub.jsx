@@ -12,12 +12,17 @@ import {
   HardwarePage, LanguagePage, NotificationsPage, AboutPage,
 } from '../settings/Settings.jsx';
 
-// ─── Network page imports ───
-import {
-  InterfacesPage, DDNSPage, PortsPage, FirewallPage, Fail2banPage,
-  SmbPanel, FtpPanel, SshPanel, NfsPanel, WebDavPanel,
-  DnsPanel, CertsPanel, ProxyPanel, RemoteAccessPanel,
-} from '../network/Network.jsx';
+// ─── Network imports (native) ───
+import { InterfacesPage, DDNSPage, PortsPage, FirewallPage, Fail2banPage } from './NetworkPages.jsx';
+import DnsPanel from './DnsPanel.jsx';
+import CertsPanel from './CertsPanel.jsx';
+import ProxyPanel from './ProxyPanel.jsx';
+import RemoteAccessPanel from './RemoteAccessPanel.jsx';
+import SmbPanel from './SmbPanel.jsx';
+import FtpPanel from './FtpPanel.jsx';
+import SshPanel from './SshPanel.jsx';
+import NfsPanel from './NfsPanel.jsx';
+import WebDavPanel from './WebDavPanel.jsx';
 
 // ─── Storage imports (native) ───
 import {
