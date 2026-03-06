@@ -451,38 +451,37 @@ function TextSizeSection() {
 function WidgetGeneralSection() {
   const { widgetMode, setWidgetMode } = useTheme();
 
-  const modes = [
-    { id: 'dynamic', label: 'Dynamic Widgets', desc: 'Interactive widgets on the desktop' },
-    { id: 'off', label: 'Disabled', desc: 'No widgets on the desktop' },
-  ];
+  const handleToggle = (mode) => {
+    if (widgetMode === mode) {
+      setWidgetMode('off');
+    } else {
+      setWidgetMode(mode);
+    }
+  };
+
+  const rowStyle = {
+    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+    padding: '14px 0', borderBottom: '1px solid var(--border)',
+  };
 
   return (
     <div className={styles.card}>
       <div className={styles.cardLabel}>Widget Mode</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {modes.map(m => (
-          <div
-            key={m.id}
-            onClick={() => setWidgetMode(m.id)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 12,
-              padding: '12px 14px', borderRadius: 'var(--radius)',
-              background: widgetMode === m.id ? 'rgba(233, 84, 32, 0.06)' : 'var(--bg-input)',
-              border: widgetMode === m.id ? '1px solid var(--accent)' : '1px solid transparent',
-              cursor: 'pointer', transition: 'all 0.15s',
-            }}
-          >
-            <div style={{
-              width: 18, height: 18, borderRadius: '50%',
-              border: widgetMode === m.id ? '5px solid var(--accent)' : '2px solid var(--text-muted)',
-              boxSizing: 'border-box', flexShrink: 0,
-            }} />
-            <div>
-              <div style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--weight-medium)', color: 'var(--text-primary)' }}>{m.label}</div>
-              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 2 }}>{m.desc}</div>
-            </div>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div style={rowStyle}>
+          <div>
+            <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-primary)', fontWeight: 'var(--weight-medium)' }}>Dynamic Widgets</div>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 2 }}>Centered grid on the desktop</div>
           </div>
-        ))}
+          <Toggle on={widgetMode === 'dynamic'} onChange={() => handleToggle('dynamic')} />
+        </div>
+        <div style={{ ...rowStyle, borderBottom: 'none' }}>
+          <div>
+            <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-primary)', fontWeight: 'var(--weight-medium)' }}>Classic Widgets</div>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 2 }}>Sidebar panel on the right</div>
+          </div>
+          <Toggle on={widgetMode === 'classic'} onChange={() => handleToggle('classic')} />
+        </div>
       </div>
     </div>
   );
