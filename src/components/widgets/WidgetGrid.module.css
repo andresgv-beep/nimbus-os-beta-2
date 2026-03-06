@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════
    NimOS Widget Grid — Layout engine
-   Puzzle-style dynamic grid
+   Puzzle-style dynamic grid + classic sidebar mode
    ═══════════════════════════════════ */
 
 .gridWrapper {
@@ -11,6 +11,19 @@
   padding-top: 8%;
   pointer-events: none;
   z-index: 1;
+}
+
+/* ─── Classic mode: right sidebar ─── */
+.classicMode {
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding-top: 12px;
+  padding-right: 14px;
+  padding-bottom: 80px;
+}
+
+.classicMode .grid {
+  grid-auto-rows: auto;
 }
 
 .grid {

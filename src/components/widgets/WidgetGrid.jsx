@@ -65,22 +65,25 @@ function computeLayout(widgets, columns) {
 // WidgetGrid — renders widgets in a puzzle grid
 // ═══════════════════════════════════
 
-export default function WidgetGrid({ widgets, columns = 4, renderWidget }) {
-  // widgets: [{ id, size, component, ... }]
-  // renderWidget: (widget) => JSX
+export default function WidgetGrid({ widgets, columns = 4, mode = 'dynamic', renderWidget }) {
+  const effectiveColumns = mode === 'classic' ? 1 : columns;
 
   const layout = useMemo(
-    () => computeLayout(widgets, columns),
-    [widgets, columns]
+    () => computeLayout(widgets, effectiveColumns),
+    [widgets, effectiveColumns]
   );
 
   if (!widgets || widgets.length === 0) return null;
 
+  const wrapperClass = mode === 'classic'
+    ? `${styles.gridWrapper} ${styles.classicMode}`
+    : styles.gridWrapper;
+
   return (
-    <div className={styles.gridWrapper}>
+    <div className={wrapperClass}>
       <div
         className={styles.grid}
-        style={{ '--widget-columns': columns }}
+        style={{ '--widget-columns': effectiveColumns }}
       >
         {layout.map((pos) => {
           const widget = widgets.find(w => w.id === pos.id);

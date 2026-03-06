@@ -41,17 +41,20 @@ export default function DynamicWidgets() {
   // Don't render if widgets are disabled
   if (widgetMode === 'off') return null;
 
-  // TODO: read enabled widgets from user preferences context
-  const widgets = DEFAULT_WIDGETS;
-  const columns = 4;
+  const isClassic = widgetMode === 'classic';
+
+  // In classic mode, all widgets become 1x1 stacked vertically
+  const widgets = isClassic
+    ? DEFAULT_WIDGETS.map(w => ({ ...w, size: '1x1' }))
+    : DEFAULT_WIDGETS;
 
   const renderWidget = (widget) => {
     const reg = WIDGET_REGISTRY[widget.id];
     if (!reg) return null;
 
     const Comp = reg.component;
+    const effectiveSize = isClassic ? '1x1' : widget.size;
 
-    // Map widget IDs to the app they should open
     const appMap = {
       'system-monitor': 'monitor',
       'disk-pool':      'nimsettings',
@@ -62,13 +65,14 @@ export default function DynamicWidgets() {
       ? () => openWindow(appMap[widget.id], { width: 960, height: 640 })
       : undefined;
 
-    return <Comp size={widget.size} onClick={handleClick} />;
+    return <Comp size={effectiveSize} onClick={handleClick} />;
   };
 
   return (
     <WidgetGrid
       widgets={widgets}
-      columns={columns}
+      columns={isClassic ? 1 : 4}
+      mode={widgetMode}
       renderWidget={renderWidget}
     />
   );
