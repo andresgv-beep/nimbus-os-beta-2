@@ -70,10 +70,11 @@ const GRID = {
   system: [
     { id: 'users', label: 'Users', icon: Hub.HubUsersIcon, title: 'System Management' },
     { id: 'shares', label: 'Shared Folders', icon: Hub.HubSharedFoldersIcon },
+    { id: 'appperm', label: 'App Permissions', icon: Hub.HubAppPermIcon },
     { id: 'portal', label: 'Portal', icon: Hub.HubPortalIcon },
     { id: 'monitor', label: 'Monitor', icon: Hub.HubMonitorIcon },
     { id: 'updates', label: 'Updates', icon: Hub.HubUpdatesIcon },
-    { id: 'power', label: 'Power', icon: Hub.HubPowerIcon },
+    { id: 'performance', label: 'Performance', icon: Hub.HubPerformanceIcon },
   ],
   storage: [
     { id: 'storage-mgr', label: 'Storage Manager', icon: Hub.HubStorageIcon, title: 'Storage' },
@@ -125,11 +126,12 @@ const SECTION_SIDEBAR = {
   'nfs':           { label: 'NFS', items: ['Configuration'] },
   'webdav':        { label: 'WebDAV', items: ['Configuration'] },
   'users':         { label: 'Users', items: ['User Accounts'] },
-  'shares':        { label: 'Shared Folders', items: ['Shared Folders', 'App Permissions'] },
+  'shares':        { label: 'Shared Folders', items: ['Shared Folders'] },
+  'appperm':       { label: 'App Permissions', items: ['App Permissions'] },
   'portal':        { label: 'Portal', items: ['Web Portal'] },
   'monitor':       { label: 'System Monitor', items: ['Overview', 'CPU', 'Memory', 'GPU', 'Processes'] },
   'updates':       { label: 'Updates', items: ['System Updates'] },
-  'power':         { label: 'Power', items: ['Restart Service', 'Reboot System', 'Shutdown'] },
+  'performance':   { label: 'Performance', items: ['Performance'] },
   '2fa':           { label: '2FA / Login', items: ['Login Settings'] },
   'sessions':      { label: 'Sessions', items: ['Active Sessions'] },
   'backup':        { label: 'Backup', items: ['Backup & Restore'] },
@@ -138,7 +140,7 @@ const SECTION_SIDEBAR = {
   'disks':         { label: 'Disks', items: ['Physical Disks', 'Pools', 'Create Pool'] },
   'health':        { label: 'Health', items: ['SMART Health'] },
   'restore':       { label: 'Restore Pool', items: ['Restore Pool'] },
-  'theme':         { label: 'Appearance', items: ['Theme', 'Accent Color', 'Performance', 'Window Glow'] },
+  'theme':         { label: 'Appearance', items: ['Theme', 'Accent Color', 'Window Glow'] },
   'desktop':       { label: 'Desktop', items: ['Icons', 'Dock', 'Text Size'] },
   'wallpaper':     { label: 'Wallpaper', items: ['Wallpaper'] },
   'widgets':       { label: 'Widgets', items: ['General', 'Scale', 'Active Widgets'] },
@@ -157,7 +159,6 @@ const SECTION_COMPONENTS = {
   'theme': {
     'Theme':        ThemeSection,
     'Accent Color': AccentSection,
-    'Performance':  PerformanceSection,
     'Window Glow':  GlowSection,
   },
   'wallpaper': {
@@ -215,11 +216,14 @@ const SECTION_COMPONENTS = {
   },
   'shares': {
     'Shared Folders':  SharedFoldersPage,
+  },
+  'appperm': {
     'App Permissions': AppPermissionsPage,
   },
-  'portal':  { 'Web Portal':      PortalPage },
-  'updates': { 'System Updates':   UpdatesPage },
-  '2fa':     { 'Login Settings':   LoginSettingsPage },
+  'portal':      { 'Web Portal':      PortalPage },
+  'updates':     { 'System Updates':   UpdatesPage },
+  'performance': { 'Performance':      PerformanceSection },
+  '2fa':         { 'Login Settings':   LoginSettingsPage },
 
 };
 
