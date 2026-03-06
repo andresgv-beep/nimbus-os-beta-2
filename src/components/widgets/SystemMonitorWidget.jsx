@@ -37,7 +37,7 @@ export default function SystemMonitorWidget({ size = '2x1', onClick }) {
         .catch(() => {});
     };
     fetchStats();
-    const iv = setInterval(fetchStats, 5000);
+    const iv = setInterval(fetchStats, 3000);
     return () => clearInterval(iv);
   }, [token]);
 
