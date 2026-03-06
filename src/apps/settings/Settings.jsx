@@ -449,34 +449,77 @@ function TextSizeSection() {
 }
 
 function WidgetGeneralSection() {
-  const { showWidgets, setShowWidgets } = useTheme();
+  const { widgetMode, setWidgetMode } = useTheme();
+
+  const modes = [
+    { id: 'dynamic', label: 'Dynamic Widgets', desc: 'Interactive widgets on the desktop' },
+    { id: 'off', label: 'Disabled', desc: 'No widgets on the desktop' },
+  ];
+
   return (
     <div className={styles.card}>
-      <div className={styles.cardLabel}>General</div>
-      <div className={styles.toggleGrid}>
-        <div className={styles.toggleRow}>
-          <span>Show widgets panel</span>
-          <Toggle on={showWidgets} onChange={() => setShowWidgets(!showWidgets)} />
-        </div>
+      <div className={styles.cardLabel}>Widget Mode</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {modes.map(m => (
+          <div
+            key={m.id}
+            onClick={() => setWidgetMode(m.id)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 12,
+              padding: '12px 14px', borderRadius: 'var(--radius)',
+              background: widgetMode === m.id ? 'rgba(233, 84, 32, 0.06)' : 'var(--bg-input)',
+              border: widgetMode === m.id ? '1px solid var(--accent)' : '1px solid transparent',
+              cursor: 'pointer', transition: 'all 0.15s',
+            }}
+          >
+            <div style={{
+              width: 18, height: 18, borderRadius: '50%',
+              border: widgetMode === m.id ? '5px solid var(--accent)' : '2px solid var(--text-muted)',
+              boxSizing: 'border-box', flexShrink: 0,
+            }} />
+            <div>
+              <div style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--weight-medium)', color: 'var(--text-primary)' }}>{m.label}</div>
+              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 2 }}>{m.desc}</div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
 function WidgetScaleSection() {
-  const { widgetScale, setWidgetScale } = useTheme();
+  const { widgetScale, setWidgetScale, widgetMode } = useTheme();
+
+  const sizes = [
+    { value: 80, label: 'Small' },
+    { value: 100, label: 'Medium' },
+    { value: 120, label: 'Large' },
+  ];
+
   return (
     <div className={styles.card}>
-      <div className={styles.cardLabel}>Size</div>
-      <div className={styles.segmentedControl}>
-        {[{ value: 80, label: 'Small' }, { value: 100, label: 'Medium' }, { value: 120, label: 'Large' }].map(s => (
-          <div key={s.value}
-            className={`${styles.segment} ${widgetScale === s.value ? styles.segmentActive : ''}`}
-            onClick={() => setWidgetScale(s.value)}>
-            {s.label}
+      <div className={styles.cardLabel}>Widget Size</div>
+      {widgetMode === 'off' ? (
+        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', padding: '8px 0' }}>
+          Enable widgets to adjust their size.
+        </div>
+      ) : (
+        <>
+          <div className={styles.segmentedControl}>
+            {sizes.map(s => (
+              <div key={s.value}
+                className={`${styles.segment} ${widgetScale === s.value ? styles.segmentActive : ''}`}
+                onClick={() => setWidgetScale(s.value)}>
+                {s.label}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textAlign: 'center', marginTop: 8 }}>
+            {widgetScale}% — {widgetScale === 100 ? 'Default' : widgetScale < 100 ? 'Compact' : 'Large'}
+          </div>
+        </>
+      )}
     </div>
   );
 }
