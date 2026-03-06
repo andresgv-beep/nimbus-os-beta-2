@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import FileManager from './files/FileManager';
-import StorageManager from './storage/StorageManager';
 import SystemMonitor from './monitor/SystemMonitor';
 import Containers from './containers/Containers';
 import Network from './network/Network';
@@ -20,7 +19,6 @@ import { HardDriveIcon } from '@icons';
 const APP_COMPONENTS = {
   downloads: DownloadStation,
   files: FileManager,
-  storage: StorageManager,
   monitor: SystemMonitor,
   containers: Containers,
   network: Network,
@@ -42,7 +40,7 @@ function StorageRequired() {
       <HardDriveIcon size={64} style={{ color: 'var(--text-muted)', marginBottom: 16 }} />
       <h2 style={{ color: 'var(--text-primary)', marginBottom: 8 }}>Storage Required</h2>
       <p style={{ color: 'var(--text-muted)', maxWidth: 400, marginBottom: 24 }}>
-        This feature needs a storage pool. Open <strong>Storage Manager</strong> to create one and unlock all NimbusOS features.
+        This feature needs a storage pool. Open <strong>NimSettings → Storage</strong> to create one and unlock all NimOS features.
       </p>
     </div>
   );
