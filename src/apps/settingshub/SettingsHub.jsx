@@ -4,13 +4,13 @@ import { ChevronLeftIcon, SearchIcon } from '@icons';
 import * as Hub from '@icons/hub/index.jsx';
 import styles from './SettingsHub.module.css';
 
-// ─── Settings page imports ───
+// ─── Settings imports (native) ───
 import {
   PerformanceSection, ThemeSection, AccentSection, GlowSection,
   IconsSection, DockSection, WallpaperSection, TextSizeSection,
   WidgetGeneralSection, WidgetScaleSection, WidgetActiveSection,
   HardwarePage, LanguagePage, NotificationsPage, AboutPage,
-} from '../settings/Settings.jsx';
+} from './Settings.jsx';
 
 // ─── Network imports (native) ───
 import { InterfacesPage, DDNSPage, PortsPage, FirewallPage, Fail2banPage } from './NetworkPages.jsx';
@@ -31,9 +31,9 @@ import {
   StorageSmartView, StorageCreateView, StorageRestoreView,
 } from './Storage.jsx';
 
-// ─── Control Panel imports ───
-import { UsersPage, SharedFoldersPage, AppPermissionsPage, UpdatesPage, LoginSettingsPage } from '../controlpanel/ControlPanel.jsx';
-import PortalPage from '../controlpanel/PortalPage.jsx';
+// ─── Control Panel imports (native) ───
+import { UsersPage, SharedFoldersPage, AppPermissionsPage, UpdatesPage, LoginSettingsPage } from './ControlPanel.jsx';
+import PortalPage from './PortalPage.jsx';
 
 // ═══════════════════════════════════
 // Navigation categories
