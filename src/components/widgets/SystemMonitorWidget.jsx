@@ -24,10 +24,13 @@ export default function SystemMonitorWidget({ size = '2x1', onClick }) {
     if (!token) return;
     const headers = { 'Authorization': `Bearer ${token}` };
     const fetchStats = () => {
-      fetch('/api/system/stats', { headers })
-        .then(r => r.ok ? r.json() : null)
-        .then(d => { if (d) setData(d); })
-        .catch(() => {});
+      Promise.all([
+        fetch('/api/cpu', { headers }).then(r => r.ok ? r.json() : null),
+        fetch('/api/memory', { headers }).then(r => r.ok ? r.json() : null),
+        fetch('/api/temps', { headers }).then(r => r.ok ? r.json() : null),
+      ]).then(([cpu, memory, temps]) => {
+        setData({ cpu, memory, temps });
+      }).catch(() => {});
     };
     fetchStats();
     const iv = setInterval(fetchStats, 5000);
@@ -40,9 +43,9 @@ export default function SystemMonitorWidget({ size = '2x1', onClick }) {
     </svg>
   );
 
-  const cpu = data?.cpu?.percent || 0;
+  const cpu = data?.cpu?.percent || data?.cpu?.usage || 0;
   const mem = data?.memory ? Math.round((data.memory.used / data.memory.total) * 100) : 0;
-  const temp = data?.cpu?.temperature || data?.gpu?.temperature || null;
+  const temp = data?.temps?.cpu || data?.temps?.main || null;
 
   const cpuColor = cpu > 80 ? 'var(--accent-red)' : cpu > 50 ? 'var(--accent-amber)' : 'var(--accent-green)';
   const memColor = mem > 80 ? 'var(--accent-red)' : mem > 60 ? 'var(--accent-amber)' : 'var(--accent-blue)';

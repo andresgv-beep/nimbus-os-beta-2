@@ -17,7 +17,7 @@ export default function NetworkWidget({ size = '1x1', onClick }) {
     if (!token) return;
     const headers = { 'Authorization': `Bearer ${token}` };
     const fetchStats = () => {
-      fetch('/api/system/stats', { headers })
+      fetch('/api/network', { headers })
         .then(r => r.ok ? r.json() : null)
         .then(d => { if (d) setData(d); })
         .catch(() => {});
@@ -35,11 +35,11 @@ export default function NetworkWidget({ size = '1x1', onClick }) {
     </svg>
   );
 
-  const net = data?.network;
-  const iface = net?.interface || 'eth0';
+  const net = Array.isArray(data) ? data[0] : null;
+  const iface = net?.name || '—';
   const speed = net?.speed || '—';
-  const dl = net?.rx_sec || 0;
-  const ul = net?.tx_sec || 0;
+  const dl = net?.rxRate || 0;
+  const ul = net?.txRate || 0;
   const ip = net?.ip || '—';
 
   const isSmall = size === '1x1';

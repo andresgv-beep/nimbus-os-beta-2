@@ -20,9 +20,9 @@ export default function UptimeWidget({ size = '1x1' }) {
     if (!token) return;
     const headers = { 'Authorization': `Bearer ${token}` };
     const fetchStats = () => {
-      fetch('/api/system/stats', { headers })
+      fetch('/api/uptime', { headers })
         .then(r => r.ok ? r.json() : null)
-        .then(d => { if (d?.uptime) setUptime(d.uptime); })
+        .then(d => { if (d?.uptime !== undefined) setUptime(d.uptime); })
         .catch(() => {});
     };
     fetchStats();
