@@ -70,11 +70,11 @@ const GRID = {
   system: [
     { id: 'users', label: 'Users', icon: Hub.HubUsersIcon, title: 'System Management' },
     { id: 'shares', label: 'Shared Folders', icon: Hub.HubSharedFoldersIcon },
-    { id: 'appperm', label: 'App Permissions', icon: Hub.HubAppPermIcon },
+    { id: 'appperm', label: 'App Permissions', icon: Hub.HubLockIcon },
     { id: 'portal', label: 'Portal', icon: Hub.HubPortalIcon },
     { id: 'monitor', label: 'Monitor', icon: Hub.HubMonitorIcon },
     { id: 'updates', label: 'Updates', icon: Hub.HubUpdatesIcon },
-    { id: 'performance', label: 'Performance', icon: Hub.HubPerformanceIcon },
+    { id: 'performance', label: 'Performance', icon: Hub.HubMonitorIcon },
   ],
   storage: [
     { id: 'storage-mgr', label: 'Storage Manager', icon: Hub.HubStorageIcon, title: 'Storage' },
