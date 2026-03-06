@@ -29,13 +29,13 @@ export default function ClockWidget({ size = '1x1' }) {
     <WidgetCard title="Clock" icon={icon} size={size}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 6 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', lineHeight: 1 }}>
-          <span style={{ fontSize: 42, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-2px', fontVariantNumeric: 'tabular-nums' }}>
+          <span style={{ fontSize: 54, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-2px', fontVariantNumeric: 'tabular-nums' }}>
             {hours}
           </span>
-          <span style={{ fontSize: 42, fontWeight: 600, color: 'var(--text-primary)', opacity: colonVisible ? 1 : 0.3, transition: 'opacity 0.3s', margin: '0 2px' }}>
+          <span style={{ fontSize: 54, fontWeight: 600, color: 'var(--text-primary)', opacity: colonVisible ? 1 : 0.3, transition: 'opacity 0.3s', margin: '0 2px' }}>
             :
           </span>
-          <span style={{ fontSize: 42, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-2px', fontVariantNumeric: 'tabular-nums' }}>
+          <span style={{ fontSize: 54, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-2px', fontVariantNumeric: 'tabular-nums' }}>
             {minutes}
           </span>
         </div>
