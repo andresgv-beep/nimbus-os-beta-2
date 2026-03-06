@@ -32,6 +32,7 @@ const DEFAULT_PREFS = {
   textScale: 100,
   wallpaper: '',
   showWidgets: true,
+  widgetMode: 'dynamic',
   widgetScale: 100,
   visibleWidgets: { system: true, network: true, disk: true, notifications: true },
   pinnedApps: ['files', 'appstore', 'nimsettings'],
@@ -108,6 +109,7 @@ export function ThemeProvider({ children }) {
     return localStorage.getItem('nimbus-taskbar-position') || DEFAULT_PREFS.taskbarPosition;
   });
   const [showWidgets, setShowWidgets] = useState(DEFAULT_PREFS.showWidgets);
+  const [widgetMode, setWidgetMode] = useState(DEFAULT_PREFS.widgetMode);
   const [showDesktopIcons, setShowDesktopIcons] = useState(DEFAULT_PREFS.showDesktopIcons);
   const [autoHideTaskbar, setAutoHideTaskbar] = useState(DEFAULT_PREFS.autoHideTaskbar);
   const [clock24, setClock24] = useState(DEFAULT_PREFS.clock24);
@@ -184,6 +186,7 @@ export function ThemeProvider({ children }) {
           if (p.textScale) setTextScale(p.textScale);
           if (p.wallpaper !== undefined) setWallpaperState(p.wallpaper);
           if (p.showWidgets !== undefined) setShowWidgets(p.showWidgets);
+          if (p.widgetMode) setWidgetMode(p.widgetMode);
           if (p.widgetScale) setWidgetScale(p.widgetScale);
           if (p.visibleWidgets) setVisibleWidgets(p.visibleWidgets);
           if (p.pinnedApps && Array.isArray(p.pinnedApps)) setPinnedApps(p.pinnedApps);
@@ -485,8 +488,18 @@ export function ThemeProvider({ children }) {
 
   const applyWidgetScale = useCallback((scale) => {
     setWidgetScale(scale);
-    document.documentElement.style.setProperty('--widget-panel-width', `${340 * scale / 100}px`);
+    // Scale dynamic widget cells
+    const cellBase = 184;
+    const gapBase = 14;
+    const factor = scale / 100;
+    document.documentElement.style.setProperty('--widget-cell', `${Math.round(cellBase * factor)}px`);
+    document.documentElement.style.setProperty('--widget-gap', `${Math.round(gapBase * factor)}px`);
     savePrefsToServer({ widgetScale: scale });
+  }, [savePrefsToServer]);
+
+  const setWidgetModeAndSave = useCallback((mode) => {
+    setWidgetMode(mode);
+    savePrefsToServer({ widgetMode: mode });
   }, [savePrefsToServer]);
 
   const toggleWidget = useCallback((key) => {
@@ -558,6 +571,8 @@ export function ThemeProvider({ children }) {
     setTaskbarSize: applyTaskbarSize,
     setTaskbarPosition: applyTaskbarPosition,
     setShowWidgets: setShowWidgetsAndSave,
+    widgetMode,
+    setWidgetMode: setWidgetModeAndSave,
     setShowDesktopIcons: setShowDesktopIconsAndSave,
     setAutoHideTaskbar: setAutoHideTaskbarAndSave,
     setClock24: setClock24AndSave,
