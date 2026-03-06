@@ -27,8 +27,8 @@ const DEFAULT_WIDGETS = [
   { id: 'clock',          size: '1x1' },
   { id: 'uptime',         size: '1x1' },
   { id: 'system-monitor', size: '2x1' },
+  { id: 'network',        size: '2x1' },
   { id: 'disk-pool',      size: '1x1' },
-  { id: 'network',        size: '1x1' },
 ];
 
 // ═══════════════════════════════════
