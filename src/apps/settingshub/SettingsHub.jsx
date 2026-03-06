@@ -19,12 +19,12 @@ import {
   DnsPanel, CertsPanel, ProxyPanel, RemoteAccessPanel,
 } from '../network/Network.jsx';
 
-// ─── Storage imports ───
+// ─── Storage imports (native) ───
 import {
   StorageProvider,
   StorageOverviewView, StorageDisksView, StoragePoolsView,
   StorageSmartView, StorageCreateView, StorageRestoreView,
-} from '../storage/StorageManager.jsx';
+} from './Storage.jsx';
 
 // ─── Control Panel imports ───
 import { UsersPage, SharedFoldersPage, AppPermissionsPage, UpdatesPage, LoginSettingsPage } from '../controlpanel/ControlPanel.jsx';
@@ -73,8 +73,8 @@ const GRID = {
   storage: [
     { id: 'storage-mgr', label: 'Storage Manager', icon: Hub.HubStorageIcon, title: 'Storage' },
     { id: 'disks', label: 'Disks', icon: Hub.HubDisksIcon },
-    { id: 'pools', label: 'Pools & RAID', icon: Hub.HubPoolsIcon },
     { id: 'health', label: 'Health', icon: Hub.HubHealthIcon },
+    { id: 'restore', label: 'Restore Pool', icon: Hub.HubPoolsIcon },
   ],
   network: [
     { id: 'network-mgr', label: 'Network Manager', icon: Hub.HubNetworkIcon, title: 'Network & Services' },
@@ -110,11 +110,7 @@ const GRID = {
 // ═══════════════════════════════════
 
 const SECTION_SIDEBAR = {
-  'storage-mgr':   { label: 'Storage Manager', grouped: true, items: [
-    { label: 'Overview', section: 'Storage' },
-    { label: 'Physical Disks' }, { label: 'Pools' }, { label: 'SMART Health' },
-    { label: 'Create Pool', section: 'Actions' }, { label: 'Restore Pool' },
-  ]},
+  'storage-mgr':   { label: 'Storage Manager', items: ['Overview'] },
   'network-mgr':   { label: 'Network', grouped: true, items: [
     { label: 'Interfaces', section: 'Network' },
     { label: 'DNS' },
@@ -136,12 +132,9 @@ const SECTION_SIDEBAR = {
   'backup':        { label: 'Backup', items: ['Backup & Restore'] },
   'logs':          { label: 'Logs', items: ['System Log'] },
   // ─── Storage (individual grid items) ───
-  'disks':         { label: 'Disks', items: ['Physical Disks', 'SMART Health'] },
-  'pools':         { label: 'Pools & RAID', grouped: true, items: [
-    { label: 'Pools', section: 'Storage' },
-    { label: 'Create Pool', section: 'Actions' }, { label: 'Restore Pool' },
-  ]},
+  'disks':         { label: 'Disks', items: ['Physical Disks', 'Pools', 'Create Pool'] },
   'health':        { label: 'Health', items: ['SMART Health'] },
+  'restore':       { label: 'Restore Pool', items: ['Restore Pool'] },
   // ─── Network (individual grid items) ───
   'remote-access': { label: 'Remote Access', items: ['Configuration'] },
   'ddns':          { label: 'DDNS', items: ['Configuration'] },
@@ -208,15 +201,15 @@ const SECTION_COMPONENTS = {
     'Fail2ban':      Fail2banPage,
   },
 
-  // ─── Storage (unified sidebar) ───
+  // ─── Storage (unified) ───
   'storage-mgr': {
     'Overview':       StorageOverviewView,
-    'Physical Disks': StorageDisksView,
-    'Pools':          StoragePoolsView,
-    'SMART Health':   StorageSmartView,
-    'Create Pool':    StorageCreateView,
-    'Restore Pool':   StorageRestoreView,
   },
+
+  // ─── Storage (individual grid items) ───
+  'disks':   { 'Physical Disks': StorageDisksView, 'Pools': StoragePoolsView, 'Create Pool': StorageCreateView },
+  'health':  { 'SMART Health': StorageSmartView },
+  'restore': { 'Restore Pool': StorageRestoreView },
 
   // ─── Control Panel ───
   'users': {
@@ -229,11 +222,6 @@ const SECTION_COMPONENTS = {
   'portal':  { 'Web Portal':      PortalPage },
   'updates': { 'System Updates':   UpdatesPage },
   '2fa':     { 'Login Settings':   LoginSettingsPage },
-
-  // ─── Storage (individual grid items) ───
-  'disks':  { 'Physical Disks': StorageDisksView, 'SMART Health': StorageSmartView },
-  'pools':  { 'Pools': StoragePoolsView, 'Create Pool': StorageCreateView, 'Restore Pool': StorageRestoreView },
-  'health': { 'SMART Health': StorageSmartView },
 
   // ─── Network (individual grid items) ───
   'remote-access': { 'Configuration': RemoteAccessPanel },
@@ -251,7 +239,7 @@ const SECTION_COMPONENTS = {
 // Lives outside SettingsHub so provider doesn't re-mount on sidebar item change
 // ═══════════════════════════════════
 
-const PROVIDER_SECTIONS = { 'storage-mgr': StorageProvider, 'disks': StorageProvider, 'pools': StorageProvider, 'health': StorageProvider };
+const PROVIDER_SECTIONS = { 'storage-mgr': StorageProvider, 'disks': StorageProvider, 'health': StorageProvider, 'restore': StorageProvider };
 
 function SectionRendererInner({ section, sidebarItem, sectionDef }) {
   const sectionMap = SECTION_COMPONENTS[section];
