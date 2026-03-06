@@ -104,16 +104,16 @@ export default function NetworkWidget({ size = '1x1', onClick }) {
     if (!token) return;
     const headers = { 'Authorization': `Bearer ${token}` };
     const fetchStats = () => {
-      fetch('/api/network', { headers })
+      fetch('/api/system', { headers })
         .then(r => r.ok ? r.json() : null)
         .then(d => {
           if (d) {
-            setData(d);
-            const iface = Array.isArray(d) ? d[0] : null;
-            if (iface) {
+            const net = d.primaryNet || (Array.isArray(d.network) ? d.network[0] : null);
+            setData(net);
+            if (net) {
               setHistory(prev => ({
-                rx: [...prev.rx.slice(-(MAX_POINTS - 1)), iface.rxRate || 0],
-                tx: [...prev.tx.slice(-(MAX_POINTS - 1)), iface.txRate || 0],
+                rx: [...prev.rx.slice(-(MAX_POINTS - 1)), net.rxRate || 0],
+                tx: [...prev.tx.slice(-(MAX_POINTS - 1)), net.txRate || 0],
               }));
             }
           }
@@ -133,9 +133,8 @@ export default function NetworkWidget({ size = '1x1', onClick }) {
     </svg>
   );
 
-  const net = Array.isArray(data) ? data[0] : null;
-  const dl = net?.rxRate || 0;
-  const ul = net?.txRate || 0;
+  const dl = data?.rxRate || 0;
+  const ul = data?.txRate || 0;
 
   const uploadColor = '#E95420';
   const downloadColor = '#42A5F5';
