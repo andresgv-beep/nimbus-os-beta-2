@@ -1,10 +1,10 @@
 import { useWindows } from '@context';
 import WidgetGrid from './WidgetGrid';
-import ClockWidget from './widgets/ClockWidget';
-import SystemMonitorWidget from './widgets/SystemMonitorWidget';
-import DiskPoolWidget from './widgets/DiskPoolWidget';
-import NetworkWidget from './widgets/NetworkWidget';
-import UptimeWidget from './widgets/UptimeWidget';
+import ClockWidget from './ClockWidget';
+import SystemMonitorWidget from './SystemMonitorWidget';
+import DiskPoolWidget from './DiskPoolWidget';
+import NetworkWidget from './NetworkWidget';
+import UptimeWidget from './UptimeWidget';
 
 // ═══════════════════════════════════
 // Widget Registry
