@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@context';
-import WidgetCard from '../WidgetCard';
+import WidgetCard from './WidgetCard';
 
 export default function DiskPoolWidget({ size = '1x1', onClick }) {
   const { token } = useAuth();

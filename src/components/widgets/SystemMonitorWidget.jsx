@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@context';
-import WidgetCard from '../WidgetCard';
+import WidgetCard from './WidgetCard';
 
 function MiniBar({ label, percent, color }) {
   return (

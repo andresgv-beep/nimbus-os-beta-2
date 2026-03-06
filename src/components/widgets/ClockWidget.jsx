@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import WidgetCard from '../WidgetCard';
+import WidgetCard from './WidgetCard';
 
 export default function ClockWidget({ size = '1x1' }) {
   const [now, setNow] = useState(new Date());
