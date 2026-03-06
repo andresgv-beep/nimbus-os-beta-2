@@ -102,8 +102,8 @@
   --window-header-height: 40px;
 
   /* ─── Dynamic Widgets ─── */
-  --widget-cell: 160px;
-  --widget-gap: 12px;
+  --widget-cell: 184px;
+  --widget-gap: 14px;
   --widget-columns: 4;
 }
 
