@@ -9,7 +9,7 @@ function formatBytes(bytes) {
   return (bytes / Math.pow(1024, i)).toFixed(i > 1 ? 1 : 0) + ' ' + units[i];
 }
 
-function CircularProgress({ percent, size = 70, strokeWidth = 5, color }) {
+function CircularProgress({ percent, size = 70, strokeWidth = 5, color, caption }) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (percent / 100) * circumference;
@@ -21,15 +21,20 @@ function CircularProgress({ percent, size = 70, strokeWidth = 5, color }) {
         <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke={color} strokeWidth={strokeWidth}
           strokeDasharray={circumference} strokeDashoffset={offset}
           strokeLinecap="round"
-          style={{ transition: 'stroke-dashoffset 0.8s ease', filter: `drop-shadow(0 0 4px ${color}50)` }} />
+          style={{ transition: 'stroke-dashoffset 0.8s ease', filter: `drop-shadow(0 0 6px ${color}50)` }} />
       </svg>
       <div style={{
         position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
+        alignItems: 'center', justifyContent: 'center', gap: 2,
       }}>
-        <span style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--weight-bold)', color, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+        <span style={{ fontSize: 'var(--text-xl)', fontWeight: 'var(--weight-bold)', color, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
           {percent}%
         </span>
+        {caption && (
+          <span style={{ fontSize: 9, color: 'var(--text-muted)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+            {caption}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -69,15 +74,16 @@ export default function DiskPoolWidget({ size = '1x1', onClick }) {
   return (
     <WidgetCard title="Disk Pool" icon={icon} size={size} onClick={onClick} loading={!pools}>
       {pool ? (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 8 }}>
-          <CircularProgress percent={percent} color={usedColor} size={size === '1x1' ? 72 : 90} strokeWidth={size === '1x1' ? 5 : 6} />
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', fontWeight: 'var(--weight-medium)' }}>
-              {pool.name}
-            </div>
-            <div style={{ fontSize: 'calc(var(--text-xs) * 0.85)', color: 'var(--text-muted)', marginTop: 1 }}>
-              {formatBytes(pool.used)} / {formatBytes(pool.total)}
-            </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 6 }}>
+          <CircularProgress
+            percent={percent}
+            color={usedColor}
+            size={size === '1x1' ? 100 : 110}
+            strokeWidth={size === '1x1' ? 7 : 8}
+            caption={`${formatBytes(pool.used)} / ${formatBytes(pool.total)}`}
+          />
+          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', fontWeight: 'var(--weight-medium)' }}>
+            {pool.name}
           </div>
         </div>
       ) : (
