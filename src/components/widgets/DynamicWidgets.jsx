@@ -1,4 +1,4 @@
-import { useWindows } from '@context';
+import { useWindows, useTheme } from '@context';
 import WidgetGrid from './WidgetGrid';
 import ClockWidget from './ClockWidget';
 import SystemMonitorWidget from './SystemMonitorWidget';
@@ -36,9 +36,12 @@ const DEFAULT_WIDGETS = [
 
 export default function DynamicWidgets() {
   const { openWindow } = useWindows();
+  const { widgetMode } = useTheme();
+
+  // Don't render if widgets are disabled
+  if (widgetMode === 'off') return null;
 
   // TODO: read enabled widgets from user preferences context
-  // For now, use defaults
   const widgets = DEFAULT_WIDGETS;
   const columns = 4;
 
