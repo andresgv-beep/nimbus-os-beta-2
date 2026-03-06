@@ -63,9 +63,8 @@ function NavIcon({ type, size = 18 }) {
 
 const GRID = {
   system: [
-    { id: 'storage-mgr', label: 'Storage', icon: Hub.HubStorageIcon, title: 'System Management' },
-    { id: 'network-mgr', label: 'Network', icon: Hub.HubNetworkIcon },
-    { id: 'users', label: 'Users', icon: Hub.HubUsersIcon },
+    { id: 'users', label: 'Users', icon: Hub.HubUsersIcon, title: 'System Management' },
+    { id: 'shares', label: 'Shared Folders', icon: Hub.HubSharedFoldersIcon },
     { id: 'portal', label: 'Portal', icon: Hub.HubPortalIcon },
     { id: 'monitor', label: 'Monitor', icon: Hub.HubMonitorIcon },
     { id: 'updates', label: 'Updates', icon: Hub.HubUpdatesIcon },
@@ -126,7 +125,8 @@ const SECTION_SIDEBAR = {
     { label: 'FTP / SFTP' }, { label: 'SSH' }, { label: 'NFS' }, { label: 'WebDAV' },
     { label: 'Firewall', section: 'Security' }, { label: 'Fail2ban' },
   ]},
-  'users':         { label: 'Users & Permissions', items: ['User Accounts', 'Shared Folders', 'App Permissions'] },
+  'users':         { label: 'Users', items: ['User Accounts'] },
+  'shares':        { label: 'Shared Folders', items: ['Shared Folders', 'App Permissions'] },
   'portal':        { label: 'Portal', items: ['Web Portal'] },
   'monitor':       { label: 'System Monitor', items: ['Overview', 'CPU', 'Memory', 'GPU', 'Processes'] },
   'updates':       { label: 'Updates', items: ['System Updates'] },
@@ -221,6 +221,8 @@ const SECTION_COMPONENTS = {
   // ─── Control Panel ───
   'users': {
     'User Accounts':   UsersPage,
+  },
+  'shares': {
     'Shared Folders':  SharedFoldersPage,
     'App Permissions': AppPermissionsPage,
   },
