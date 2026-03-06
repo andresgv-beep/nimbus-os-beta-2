@@ -3,9 +3,13 @@ import WidgetCard from './WidgetCard';
 
 export default function ClockWidget({ size = '1x1' }) {
   const [now, setNow] = useState(new Date());
+  const [colonVisible, setColonVisible] = useState(true);
 
   useEffect(() => {
-    const iv = setInterval(() => setNow(new Date()), 1000);
+    const iv = setInterval(() => {
+      setNow(new Date());
+      setColonVisible(v => !v);
+    }, 1000);
     return () => clearInterval(iv);
   }, []);
 
@@ -23,11 +27,19 @@ export default function ClockWidget({ size = '1x1' }) {
 
   return (
     <WidgetCard title="Clock" icon={icon} size={size}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 2 }}>
-        <div style={{ fontSize: 'var(--text-3xl)', fontWeight: 'var(--weight-bold)', color: 'var(--text-primary)', lineHeight: 1, letterSpacing: '-1px' }}>
-          {hours}:{minutes}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', lineHeight: 1 }}>
+          <span style={{ fontSize: 42, fontWeight: 200, color: 'var(--text-primary)', letterSpacing: '-2px', fontVariantNumeric: 'tabular-nums' }}>
+            {hours}
+          </span>
+          <span style={{ fontSize: 42, fontWeight: 200, color: 'var(--accent)', opacity: colonVisible ? 1 : 0.3, transition: 'opacity 0.3s', margin: '0 1px' }}>
+            :
+          </span>
+          <span style={{ fontSize: 42, fontWeight: 200, color: 'var(--text-primary)', letterSpacing: '-2px', fontVariantNumeric: 'tabular-nums' }}>
+            {minutes}
+          </span>
         </div>
-        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textTransform: 'capitalize' }}>
+        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textTransform: 'capitalize', letterSpacing: '0.3px' }}>
           {day}, {date}
         </div>
       </div>

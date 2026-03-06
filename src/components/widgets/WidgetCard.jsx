@@ -2,14 +2,16 @@ import styles from './WidgetCard.module.css';
 
 // ═══════════════════════════════════
 // WidgetCard — Base wrapper for all widgets
-// Provides: card chrome, header, click-to-open, menu
+// Glass morphism card with depth
 // ═══════════════════════════════════
 
 export default function WidgetCard({ title, icon, size = '1x1', onClick, children, loading, error }) {
   const [cols, rows] = size.split('x').map(Number);
-  const isSmall = cols === 1 && rows === 1;
 
-  const sizeClass = isSmall ? styles.sizeSmall : '';
+  const sizeClass =
+    cols === 1 && rows === 1 ? styles.sizeSmall :
+    cols === 2 && rows === 1 ? styles.sizeWide :
+    cols === 2 && rows === 2 ? styles.sizeLarge : '';
 
   return (
     <div
@@ -25,7 +27,7 @@ export default function WidgetCard({ title, icon, size = '1x1', onClick, childre
         <div className={styles.headerTitle}>{title}</div>
         <div
           className={styles.headerMenu}
-          onClick={(e) => { e.stopPropagation(); /* TODO: context menu */ }}
+          onClick={(e) => { e.stopPropagation(); }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
             <circle cx="5" cy="12" r="2" />
@@ -38,7 +40,11 @@ export default function WidgetCard({ title, icon, size = '1x1', onClick, childre
       {/* Body */}
       <div className={styles.body}>
         {loading ? (
-          <div className={styles.loading}>Loading...</div>
+          <div className={styles.loading}>
+            <div className={styles.loadingDot} />
+            <div className={styles.loadingDot} />
+            <div className={styles.loadingDot} />
+          </div>
         ) : error ? (
           <div className={styles.error}>{error}</div>
         ) : (

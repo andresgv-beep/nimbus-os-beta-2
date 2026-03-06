@@ -2,6 +2,39 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@context';
 import WidgetCard from './WidgetCard';
 
+function formatBytes(bytes) {
+  if (!bytes || bytes <= 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return (bytes / Math.pow(1024, i)).toFixed(i > 1 ? 1 : 0) + ' ' + units[i];
+}
+
+function CircularProgress({ percent, size = 70, strokeWidth = 5, color }) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (percent / 100) * circumference;
+
+  return (
+    <div style={{ position: 'relative', width: size, height: size }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="var(--bg-hover)" strokeWidth={strokeWidth} />
+        <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke={color} strokeWidth={strokeWidth}
+          strokeDasharray={circumference} strokeDashoffset={offset}
+          strokeLinecap="round"
+          style={{ transition: 'stroke-dashoffset 0.8s ease', filter: `drop-shadow(0 0 4px ${color}50)` }} />
+      </svg>
+      <div style={{
+        position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+      }}>
+        <span style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--weight-bold)', color, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+          {percent}%
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function DiskPoolWidget({ size = '1x1', onClick }) {
   const { token } = useAuth();
   const [pools, setPools] = useState(null);
@@ -31,42 +64,25 @@ export default function DiskPoolWidget({ size = '1x1', onClick }) {
 
   const pool = pools?.[0];
   const percent = pool?.usagePercent || 0;
-  const usedColor = percent > 90 ? 'var(--accent-red)' : percent > 75 ? 'var(--accent-amber)' : 'var(--accent-green)';
-
-  const formatBytes = (bytes) => {
-    if (!bytes || bytes <= 0) return '0 B';
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return (bytes / Math.pow(1024, i)).toFixed(i > 1 ? 1 : 0) + ' ' + units[i];
-  };
-
-  const isSmall = size === '1x1';
+  const usedColor = percent > 90 ? '#EF5350' : percent > 75 ? '#FFA726' : '#4CAF50';
 
   return (
     <WidgetCard title="Disk Pool" icon={icon} size={size} onClick={onClick} loading={!pools}>
       {pool ? (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: isSmall ? 4 : 8 }}>
-          {/* Circular progress */}
-          <div style={{ position: 'relative', width: isSmall ? 56 : 72, height: isSmall ? 56 : 72 }}>
-            <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
-              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none" stroke="var(--bg-hover)" strokeWidth="3" />
-              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none" stroke={usedColor} strokeWidth="3"
-                strokeDasharray={`${percent}, 100`}
-                style={{ transition: 'stroke-dasharray 0.5s ease' }} />
-            </svg>
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isSmall ? 'var(--text-sm)' : 'var(--text-md)', fontWeight: 'var(--weight-bold)', color: usedColor }}>
-              {percent}%
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 8 }}>
+          <CircularProgress percent={percent} color={usedColor} size={size === '1x1' ? 72 : 90} strokeWidth={size === '1x1' ? 5 : 6} />
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', fontWeight: 'var(--weight-medium)' }}>
+              {pool.name}
             </div>
-          </div>
-          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textAlign: 'center' }}>
-            {pool.name} · {formatBytes(pool.used)} / {formatBytes(pool.total)}
+            <div style={{ fontSize: 'calc(var(--text-xs) * 0.85)', color: 'var(--text-muted)', marginTop: 1 }}>
+              {formatBytes(pool.used)} / {formatBytes(pool.total)}
+            </div>
           </div>
         </div>
       ) : (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
-          No pool
+          No pool configured
         </div>
       )}
     </WidgetCard>
